@@ -7,7 +7,7 @@
  *
  * MC01- Green Property Exchange
  * @author Group 23 - John Ethan Chiuten
- * @version 1.0
+ * @version 1.1
  */
 
 public class Date {
@@ -37,13 +37,21 @@ public class Date {
     }
 
     /**
-     *
-     * @return Pricing per night on a specific date
+     * Gets the price per night.
+     * @return Price per night
      */
-    public double pricePerNight(){
+    public double getPricePerNight() { 
         return pricePerNight;
     }
 
+    /**
+     * Updates the price per night (used when Property base price changes).
+     * @param newPrice The new price per night
+     */
+    public void setPricePerNight(double newPrice) {
+        this.pricePerNight = newPrice;
+    }
+    
     /**
      *
      * @return If a date is booked
@@ -66,3 +74,4 @@ public class Date {
         isBooked = false;
     }
 }
+
