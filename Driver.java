@@ -5,7 +5,7 @@
  * Provides navigation for creating, viewing, managing, and booking properties.
  * 
  * MCO1 - Green Property Exchange
- * @author Group 23
+ * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
  * @version 1.0
  */
 
@@ -60,3 +60,4 @@ public class Driver {
         sc.close();
     }
 }
+
