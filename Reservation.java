@@ -103,11 +103,12 @@ public class Reservation {
         System.out.println("Guest Name: " + guestName);
         System.out.println("Check-in Day: " + checkIn);
         System.out.println("Check-out Day: " + checkOut);
-        System.out.println("Total Price: ₱" + totalPrice);
+        System.out.println("Total Price: PHP" + totalPrice);
 
         System.out.println("\nPrice Breakdown:");
         for (int i = 0; i < breakdown.size(); i++) {
-            System.out.printf(" Day %d: ₱%.2f%n", (checkIn + i), breakdown.get(i));
+            System.out.printf(" Day %d: PHP%.2f%n", (checkIn + i), breakdown.get(i));
         }
     }
 }
+
