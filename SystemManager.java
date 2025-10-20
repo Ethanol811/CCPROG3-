@@ -6,7 +6,7 @@
  * Ensures unique property names and enforces system rules.
  * 
  * MCO1 - Green Property Exchange
- * @author [Your Name]
+ * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
  * @version 1.0
  */
 
@@ -238,3 +238,4 @@ public class SystemManager {
         }
     }
 }
+
