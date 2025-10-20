@@ -113,7 +113,7 @@ public class Property {
             return;
         }
         if (dayNumber < 1 || dayNumber > 30) {
-            System.out.println("Invalid day number. Must be 1–30.");
+            System.out.println("Invalid day number. Must be 1-30.");
             return;
         }
 
@@ -126,7 +126,7 @@ public class Property {
         }
 
         dates.add(new Date(dayNumber, basePrice));
-        System.out.println("Added date " + dayNumber + " with price ₱" + basePrice);
+        System.out.println("Added date " + dayNumber + " with price PHP" + basePrice);
     }
 
     /**
@@ -162,9 +162,10 @@ public class Property {
     public void displayInfo() {
         System.out.println("\n-- PROPERTY INFO --");
         System.out.println("Name: " + name);
-        System.out.println("Base Price: ₱" + basePrice);
+        System.out.println("Base Price: PHP" + basePrice);
         System.out.println("Available Dates: " + dates.size());
-        System.out.println("Total Earnings: ₱" + calculateEarnings());
+        System.out.println("Total Earnings: PHP" + calculateEarnings());
     }
 }
+
 
