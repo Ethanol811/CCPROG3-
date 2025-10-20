@@ -39,12 +39,12 @@ public class SystemManager {
         String name = sc.nextLine().trim();
 
         if (name.isEmpty()) {
-            System.out.println("❌ Property name cannot be blank.");
+            System.out.println("Property name cannot be blank.");
             return;
         }
 
         if (findProperty(name) != null) {
-            System.out.println("❌ Property name must be unique.");
+            System.out.println("Property name must be unique.");
             return;
         }
 
@@ -57,7 +57,7 @@ public class SystemManager {
         }
 
         properties.add(newProp);
-        System.out.println("✅ Property '" + name + "' successfully created!");
+        System.out.println("Property '" + name + "' successfully created!");
     }
 
     // -------------------------------------------------------
@@ -70,7 +70,7 @@ public class SystemManager {
      */
     public void viewProperty() {
         if (properties.isEmpty()) {
-            System.out.println("❌ No properties available to view.");
+            System.out.println("No properties available to view.");
             return;
         }
 
@@ -81,7 +81,7 @@ public class SystemManager {
         Property prop = findProperty(name);
 
         if (prop == null) {
-            System.out.println("❌ Property not found.");
+            System.out.println("Property not found.");
             return;
         }
 
@@ -98,7 +98,7 @@ public class SystemManager {
      */
     public void manageProperty() {
         if (properties.isEmpty()) {
-            System.out.println("❌ No properties to manage.");
+            System.out.println("No properties to manage.");
             return;
         }
 
@@ -109,7 +109,7 @@ public class SystemManager {
         Property prop = findProperty(name);
 
         if (prop == null) {
-            System.out.println("❌ Property not found.");
+            System.out.println("Property not found.");
             return;
         }
 
@@ -128,7 +128,7 @@ public class SystemManager {
                     System.out.print("Enter new property name: ");
                     String newName = sc.nextLine().trim();
                     if (findProperty(newName) != null) {
-                        System.out.println("❌ Another property already uses that name.");
+                        System.out.println("Another property already uses that name.");
                     } else {
                         prop.setName(newName);
                     }
@@ -142,10 +142,10 @@ public class SystemManager {
 
                 case 3:
                     if (!prop.getReservations().isEmpty()) {
-                        System.out.println("❌ Cannot remove property with active reservations.");
+                        System.out.println("Cannot remove property with active reservations.");
                     } else {
                         properties.remove(prop);
-                        System.out.println("✅ Property '" + name + "' removed successfully.");
+                        System.out.println("Property '" + name + "' removed successfully.");
                         return;
                     }
                     break;
@@ -238,4 +238,5 @@ public class SystemManager {
         }
     }
 }
+
 
