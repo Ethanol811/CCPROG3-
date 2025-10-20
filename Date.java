@@ -6,7 +6,7 @@
  * Each date has a day number, the price per night, and if the date has been booked already
  *
  * MC01- Green Property Exchange
- * @author Group 23 - John Ethan Chiuten
+ * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
  * @version 1.1
  */
 
@@ -74,4 +74,5 @@ public class Date {
         isBooked = false;
     }
 }
+
 
