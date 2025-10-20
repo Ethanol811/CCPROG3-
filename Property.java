@@ -6,7 +6,7 @@
  * and a list of reservations (initially empty). 
  * 
  * MCO1 - Green Property Exchange
- * @author Group 23
+ * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
  * @version 1.0
  */
 
@@ -167,3 +167,4 @@ public class Property {
         System.out.println("Total Earnings: ₱" + calculateEarnings());
     }
 }
+
