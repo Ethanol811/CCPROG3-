@@ -10,7 +10,7 @@
  *
  * MCO1 - Green Property Exchange
  * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
- * @version 1.0
+ * @version 1.3
  */
 
 import java.util.ArrayList;
@@ -99,16 +99,18 @@ public class Reservation {
      * Displays reservation details.
      */
     public void displayReservation() {
-        System.out.println("\n-- RESERVATION DETAILS --");
+        System.out.println("\n=== RESERVATION DETAILS ===");
+        System.out.println("-----------------------------------");
         System.out.println("Guest Name: " + guestName);
         System.out.println("Check-in Day: " + checkIn);
         System.out.println("Check-out Day: " + checkOut);
-        System.out.println("Total Price: PHP" + totalPrice);
+        System.out.println("Total Nights: " + (checkOut - checkIn));
+        System.out.println("Total Price: PHP " + String.format("%.2f", totalPrice));
 
-        System.out.println("\nPrice Breakdown:");
+        System.out.println("\nPRICE BREAKDOWN:");
         for (int i = 0; i < breakdown.size(); i++) {
-            System.out.printf(" Day %d: PHP%.2f%n", (checkIn + i), breakdown.get(i));
+            System.out.printf("   Day %2d: PHP %8.2f%n", (checkIn + i), breakdown.get(i));
         }
+        System.out.println("-----------------------------------");
     }
 }
-

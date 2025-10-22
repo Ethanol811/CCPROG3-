@@ -7,7 +7,7 @@
  *
  * MC01- Green Property Exchange
  * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
- * @version 1.1
+ * @version 1.2
  */
 
 public class Date {
