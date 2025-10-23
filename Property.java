@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /**
  * Property.java
  * 
@@ -9,9 +11,6 @@
  * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
  * @version 1.5
  */
-
-import java.util.ArrayList;
-
 public class Property {
     private String name;
     private double basePrice;
@@ -39,6 +38,7 @@ public class Property {
     // -------------------------------------------------------
 
     /**
+     * Gets the property name.
      * @return property name
      */
     public String getName() {
@@ -60,6 +60,7 @@ public class Property {
     }
 
     /**
+     * Gets the base price per night.
      * @return base price per night
      */
     public double getBasePrice() {
@@ -86,6 +87,7 @@ public class Property {
     }
 
     /**
+     * Gets the list of available dates.
      * @return list of Date objects
      */
     public ArrayList<Date> getDates() {
@@ -93,6 +95,7 @@ public class Property {
     }
 
     /**
+     * Gets the list of reservations.
      * @return list of Reservation objects
      */
     public ArrayList<Reservation> getReservations() {

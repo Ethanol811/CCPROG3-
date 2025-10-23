@@ -1,3 +1,5 @@
+import java.util.Scanner;
+
 /**
  * Driver.java
  * 
@@ -8,10 +10,11 @@
  * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
  * @version 1.6
  */
-
-import java.util.Scanner;
-
 public class Driver {
+    /**
+     * Main method to run the Green Property Exchange system.
+     * @param args Command line arguments (not used)
+     */
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         SystemManager manager = new SystemManager();

@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /**
  * Reservation.java
  *
@@ -12,10 +14,8 @@
  * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
  * @version 1.3
  */
-
-import java.util.ArrayList;
-
 public class Reservation {
+    
     private String guestName;
     private int checkIn;      // inclusive
     private int checkOut;     // exclusive
@@ -41,6 +41,7 @@ public class Reservation {
     // -------------------------------------------------------
 
     /**
+     * Gets the guest's name.
      * @return The guest's name
      */
     public String getGuestName() {
@@ -48,6 +49,7 @@ public class Reservation {
     }
 
     /**
+     * Gets the check-in day number.
      * @return Check-in day number
      */
     public int getCheckIn() {
@@ -55,6 +57,7 @@ public class Reservation {
     }
 
     /**
+     * Gets the check-out day number.
      * @return Check-out day number
      */
     public int getCheckOut() {
@@ -62,6 +65,7 @@ public class Reservation {
     }
 
     /**
+     * Gets the total price of the reservation.
      * @return Total price of reservation
      */
     public double getTotalPrice() {
@@ -69,6 +73,7 @@ public class Reservation {
     }
 
     /**
+     * Gets the nightly price breakdown.
      * @return List of nightly prices
      */
     public ArrayList<Double> getBreakdown() {

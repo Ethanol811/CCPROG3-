@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
 /**
  * SystemManager.java
  * 
@@ -9,11 +12,6 @@
  * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
  * @version 1.8
  */
-
-
-import java.util.ArrayList;
-import java.util.Scanner;
-
 public class SystemManager {
     private ArrayList<Property> properties;
     private Scanner sc;
