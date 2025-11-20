@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-
 /**
  * Property.java
  * 
@@ -8,14 +6,18 @@ import java.util.ArrayList;
  * and a list of reservations (initially empty). 
  * 
  * MCO1 - Green Property Exchange
- * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
- * @version 1.5
+ * @author Group 23
+ * @version 2
  */
+
+import java.util.ArrayList;
+
 public class Property {
     private String name;
     private double basePrice;
     private ArrayList<Date> dates;
     private ArrayList<Reservation> reservations;
+    private String propertyType;
 
     /** 
      * Default base price for all properties (PHP 1,500.00 per night).
@@ -38,7 +40,6 @@ public class Property {
     // -------------------------------------------------------
 
     /**
-     * Gets the property name.
      * @return property name
      */
     public String getName() {
@@ -60,7 +61,6 @@ public class Property {
     }
 
     /**
-     * Gets the base price per night.
      * @return base price per night
      */
     public double getBasePrice() {
@@ -87,7 +87,33 @@ public class Property {
     }
 
     /**
-     * Gets the list of available dates.
+     * @return property type
+     */
+    public String getPropertyType() {return propertyType;}
+
+    /**
+     * Updates the property type of a property.
+     * Can only be changed if there are no reservations.
+     * @param newPropertyType new property type
+     */
+    public void setPropertyType(String newPropertyType){
+        if (newPropertyType == null || newPropertyType.trim().isEmpty()){
+            System.out.println("[ERROR] Invalid type. Property type cannot be blank.");
+        } else if (!reservations.isEmpty()){
+            System.out.println("[ERROR] Cannot change property type while reservations exist.");
+        } else if (!(newPropertyType.equals("Eco-Apartment")           // Will be switched to a static list after confirmation with prof
+                || newPropertyType.equals("Sustainable House")
+                || newPropertyType.equals("Green Resort")
+                || newPropertyType.equals("Eco-Glamping"))){
+            System.out.println("[ERROR] Invalid property type.");
+        } else {
+            this.propertyType = newPropertyType;
+            System.out.println("[SUCCESS] Property Type has been updated to: " + newPropertyType);
+        }
+    }
+
+
+    /**
      * @return list of Date objects
      */
     public ArrayList<Date> getDates() {
@@ -95,7 +121,6 @@ public class Property {
     }
 
     /**
-     * Gets the list of reservations.
      * @return list of Reservation objects
      */
     public ArrayList<Reservation> getReservations() {
@@ -209,6 +234,7 @@ public class Property {
             Date date = findDate(day);
             if (date != null) {
                 date.book();
+                System.out.println("[DEBUG] Day " + day + " booked.");
             }
         }
     }
@@ -270,6 +296,7 @@ public class Property {
         System.out.println("\n=== PROPERTY INFORMATION ===");
         System.out.println("-----------------------------------");
         System.out.println("Property Name: " + name);
+        System.out.println("Property Type: " + propertyType);
         System.out.println("Base Price: PHP " + String.format("%.2f", basePrice) + " per night");
         System.out.println("Total Dates Listed: " + dates.size());
         System.out.println("Available Dates: " + getAvailableDateCount());
@@ -405,3 +432,4 @@ public class Property {
         System.out.println("-----------------------------------");
     }
 }
+

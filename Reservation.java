@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-
 /**
  * Reservation.java
  *
@@ -14,8 +12,10 @@ import java.util.ArrayList;
  * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
  * @version 1.3
  */
+
+import java.util.ArrayList;
+
 public class Reservation {
-    
     private String guestName;
     private int checkIn;      // inclusive
     private int checkOut;     // exclusive
@@ -41,7 +41,6 @@ public class Reservation {
     // -------------------------------------------------------
 
     /**
-     * Gets the guest's name.
      * @return The guest's name
      */
     public String getGuestName() {
@@ -49,7 +48,6 @@ public class Reservation {
     }
 
     /**
-     * Gets the check-in day number.
      * @return Check-in day number
      */
     public int getCheckIn() {
@@ -57,7 +55,6 @@ public class Reservation {
     }
 
     /**
-     * Gets the check-out day number.
      * @return Check-out day number
      */
     public int getCheckOut() {
@@ -65,7 +62,6 @@ public class Reservation {
     }
 
     /**
-     * Gets the total price of the reservation.
      * @return Total price of reservation
      */
     public double getTotalPrice() {
@@ -73,7 +69,6 @@ public class Reservation {
     }
 
     /**
-     * Gets the nightly price breakdown.
      * @return List of nightly prices
      */
     public ArrayList<Double> getBreakdown() {
@@ -117,5 +112,20 @@ public class Reservation {
             System.out.printf("   Day %2d: PHP %8.2f%n", (checkIn + i), breakdown.get(i));
         }
         System.out.println("-----------------------------------");
+    }
+
+    public static void main(String[] args) {
+        // Create some sample dates
+        ArrayList<Date> allDates = new ArrayList<>();
+        allDates.add(new Date(1, 1000));
+        allDates.add(new Date(2, 1000));
+        allDates.add(new Date(3, 1000));
+        allDates.add(new Date(4, 1000));
+        allDates.add(new Date(5, 1000));
+
+        // Create and calculate a reservation
+        Reservation r = new Reservation("John Lim", 2, 2);
+        r.calculateTotal(allDates);
+        r.displayReservation(); // ← Call your display me
     }
 }

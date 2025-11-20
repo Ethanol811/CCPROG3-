@@ -1,6 +1,3 @@
-import java.util.ArrayList;
-import java.util.Scanner;
-
 /**
  * SystemManager.java
  * 
@@ -10,8 +7,13 @@ import java.util.Scanner;
  * 
  * MCO1 - Green Property Exchange
  * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
- * @version 1.8
+ * @version 1.9
  */
+
+
+import java.util.ArrayList;
+import java.util.Scanner;
+
 public class SystemManager {
     private ArrayList<Property> properties;
     private Scanner sc;
@@ -49,6 +51,24 @@ public class SystemManager {
         }
 
         Property newProp = new Property(name);
+
+        System.out.print("Enter property type (Eco-Apartment, Sustainable House, Green Resort, Eco-Glamping): ");
+        String propertyType = sc.nextLine().trim();
+
+        if (propertyType.isEmpty()){
+            System.out.println("[ERROR] Property type cannot be blank.");
+            return;
+        }
+
+        if (!(propertyType.equals("Eco-Apartment")
+                || propertyType.equals("Sustainable House")
+                || propertyType.equals("Green Resort")
+                || propertyType.equals("Eco-Glamping"))){
+            System.out.println("[ERROR] Incorrect property type.");
+            return;
+        }
+
+        newProp.setPropertyType(propertyType);
 
         System.out.print("Enter number of available dates (1-30): ");
         int numDates = getValidatedInt(1, 30);
@@ -190,12 +210,13 @@ public class SystemManager {
             System.out.println("-----------------------------------");
             System.out.println("1. Change Property Name");
             System.out.println("2. Change Price per Night");
-            System.out.println("3. Add Date");
-            System.out.println("4. Remove Date");
-            System.out.println("5. Remove this Property");
-            System.out.println("6. Back to Main Menu");
+            System.out.println("3. Change Property Type");
+            System.out.println("4. Add Date");
+            System.out.println("5. Remove Date");
+            System.out.println("6. Remove this Property");
+            System.out.println("7. Back to Main Menu");
             System.out.print("Enter choice: ");
-            choice = getValidatedInt(1, 6);
+            choice = getValidatedInt(1, 7);
 
             switch (choice) {
                 case 1:
@@ -215,6 +236,21 @@ public class SystemManager {
                     break;
 
                 case 3:
+                    System.out.print("Enter new property type (Eco-Apartment, Sustainable House, Green Resort, Eco-Glamping): ");
+                    String newType = sc.nextLine().trim();
+
+                    if (!newType.equals("Eco-Apartment") &&
+                            !newType.equalsIgnoreCase("Sustainable House") &&
+                            !newType.equalsIgnoreCase("Green Resort") &&
+                            !newType.equalsIgnoreCase("Eco-Glamping")){
+                        System.out.println("[ERROR] Invalid property type.");
+                    } else {
+                        prop.setPropertyType(newType);
+                    }
+                    break;
+
+
+                case 4:
                     if (prop.getDates().size() >= 30) {
                         System.out.println("[ERROR] Cannot add more than 30 dates.");
                     } else {
@@ -224,13 +260,13 @@ public class SystemManager {
                     }
                     break;
 
-                case 4:
+                case 5:
                     System.out.print("Enter day number to remove (1-30): ");
                     int dayToRemove = getValidatedInt(1, 30);
                     prop.removeDate(dayToRemove);
                     break;
 
-                case 5:
+                case 6:
                     if (!prop.getReservations().isEmpty()) {
                         System.out.println("[ERROR] Cannot remove property with active reservations.");
                     } else {
@@ -240,11 +276,11 @@ public class SystemManager {
                     }
                     break;
 
-                case 6:
+                case 7:
                     System.out.println("Returning to main menu...");
                     break;
             }
-        } while (choice != 6);
+        } while (choice != 7);
     }
 
     // -------------------------------------------------------

@@ -9,6 +9,7 @@
  * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
  * @version 1.2
  */
+
 public class Date {
     private int dayNumber;
     private double pricePerNight;
@@ -28,7 +29,7 @@ public class Date {
     // Getters
 
     /**
-     * Gets the day number.
+     *
      * @return Day Number
      */
     public int getDayNumber(){
@@ -52,7 +53,7 @@ public class Date {
     }
     
     /**
-     * Checks if the date is booked.
+     *
      * @return If a date is booked
      */
     public boolean isBooked(){
