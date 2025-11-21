@@ -12,7 +12,7 @@
 
 import java.util.ArrayList;
 
-public class Property {
+public abstract class Property {
     private String name;
     private double basePrice;
     private ArrayList<Date> dates;
@@ -101,7 +101,7 @@ public class Property {
             System.out.println("[ERROR] Invalid type. Property type cannot be blank.");
         } else if (!reservations.isEmpty()){
             System.out.println("[ERROR] Cannot change property type while reservations exist.");
-        } else if (!(newPropertyType.equals("Eco-Apartment")           // Will be switched to a static list after confirmation with prof
+        } else if (!(newPropertyType.equals("Eco-Apartment")
                 || newPropertyType.equals("Sustainable House")
                 || newPropertyType.equals("Green Resort")
                 || newPropertyType.equals("Eco-Glamping"))){
