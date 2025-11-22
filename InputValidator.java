@@ -3,7 +3,6 @@
  *
  * Centralized input validation utility for the Green Property Exchange system.
  * Provides comprehensive validation methods for various input types and domain-specific rules.
- * Implements the Strategy pattern for flexible validation rules.
  *
  * MCO1 - Green Property Exchange
  * @author Group 23
@@ -23,52 +22,32 @@ public class InputValidator {
         this.sc = new Scanner(System.in);
     }
 
-    // -------------------------------------------------------
-    // Functional Interface for Validators
-    // -------------------------------------------------------
-
-    /**
-     * Functional interface for validation operations that may throw IllegalArgumentException.
-     *
-     * @param <T> the type of value being validated
-     */
-    @FunctionalInterface
-    public interface Validator<T> {
-        /**
-         * Validates the given value.
-         *
-         * @param value the value to validate
-         * @throws IllegalArgumentException if the value is invalid
-         */
-        void validate(T value) throws IllegalArgumentException;
-    }
-
-    // -------------------------------------------------------
-    // Common Validators
-    // -------------------------------------------------------
-
     /**
      * Validates that a string is not null or empty.
      *
      * @param value the string to validate
-     * @throws IllegalArgumentException if the string is null or empty
+     * @return true if valid, false otherwise
      */
-    public void validateNonEmpty(String value) {
+    public boolean validateNonEmpty(String value) {
         if (value == null || value.trim().isEmpty()) {
-            throw new IllegalArgumentException("Value cannot be empty");
+            System.out.println("[ERROR] Value cannot be empty");
+            return false;
         }
+        return true;
     }
 
     /**
      * Validates that a number is positive.
      *
      * @param value the number to validate
-     * @throws IllegalArgumentException if the number is negative
+     * @return true if valid, false otherwise
      */
-    public void validatePositiveNumber(double value) {
+    public boolean validatePositiveNumber(double value) {
         if (value < 0) {
-            throw new IllegalArgumentException("Value must be positive");
+            System.out.println("[ERROR] Value must be positive");
+            return false;
         }
+        return true;
     }
 
     /**
@@ -77,14 +56,14 @@ public class InputValidator {
      * @param value the number to validate
      * @param min the minimum allowed value (inclusive)
      * @param max the maximum allowed value (inclusive)
-     * @throws IllegalArgumentException if the value is outside the range
+     * @return true if valid, false otherwise
      */
-    public void validateRange(double value, double min, double max) {
+    public boolean validateRange(double value, double min, double max) {
         if (value < min || value > max) {
-            throw new IllegalArgumentException(
-                    String.format("Value must be between %.1f and %.1f", min, max)
-            );
+            System.out.printf("[ERROR] Value must be between %.1f and %.1f%n", min, max);
+            return false;
         }
+        return true;
     }
 
     // -------------------------------------------------------
@@ -101,14 +80,15 @@ public class InputValidator {
      */
     public int getValidatedInt(String prompt, int min, int max) {
         while (true) {
+            System.out.print(prompt);
+            String input = sc.nextLine().trim();
+
             try {
-                System.out.print(prompt);
-                int value = Integer.parseInt(sc.nextLine().trim());
-                if (value < min || value > max) {
-                    System.out.printf("[ERROR] Enter a number between %d and %d: ", min, max);
-                    continue;
+                int value = Integer.parseInt(input);
+                if (value >= min && value <= max) {
+                    return value;
                 }
-                return value;
+                System.out.printf("[ERROR] Enter a number between %d and %d%n", min, max);
             } catch (NumberFormatException e) {
                 System.out.print("[ERROR] Invalid input. Enter a whole number: ");
             }
@@ -125,14 +105,15 @@ public class InputValidator {
      */
     public double getValidatedDouble(String prompt, double min, double max) {
         while (true) {
+            System.out.print(prompt);
+            String input = sc.nextLine().trim();
+
             try {
-                System.out.print(prompt);
-                double value = Double.parseDouble(sc.nextLine().trim());
-                if (value < min || value > max) {
-                    System.out.printf("[ERROR] Enter a number between %.1f and %.1f: ", min, max);
-                    continue;
+                double value = Double.parseDouble(input);
+                if (value >= min && value <= max) {
+                    return value;
                 }
-                return value;
+                System.out.printf("[ERROR] Enter a number between %.1f and %.1f%n", min, max);
             } catch (NumberFormatException e) {
                 System.out.print("[ERROR] Invalid input. Enter a number: ");
             }
@@ -149,16 +130,13 @@ public class InputValidator {
      */
     public String getValidatedString(String prompt, Predicate<String> validator, String errorMessage) {
         while (true) {
-            try {
-                System.out.print(prompt);
-                String input = sc.nextLine().trim();
-                if (validator.test(input)) {
-                    return input;
-                }
-                System.out.println("[ERROR] " + errorMessage);
-            } catch (Exception e) {
-                System.out.println("[ERROR] Invalid input: " + e.getMessage());
+            System.out.print(prompt);
+            String input = sc.nextLine().trim();
+
+            if (validator.test(input)) {
+                return input;
             }
+            System.out.println("[ERROR] " + errorMessage);
         }
     }
 
@@ -172,6 +150,7 @@ public class InputValidator {
         while (true) {
             System.out.print(prompt + " (Y/N): ");
             String input = sc.nextLine().trim().toUpperCase();
+
             if (input.equals("Y") || input.equals("YES")) {
                 return true;
             } else if (input.equals("N") || input.equals("NO")) {
@@ -190,30 +169,38 @@ public class InputValidator {
      * Validates a property name according to system requirements.
      *
      * @param name the property name to validate
-     * @throws IllegalArgumentException if the name is invalid
+     * @return true if valid, false otherwise
      */
-    public void validatePropertyName(String name) {
-        validateNonEmpty(name);
+    public boolean validatePropertyName(String name) {
+        if (!validateNonEmpty(name)) {
+            return false;
+        }
         if (name.length() < 2) {
-            throw new IllegalArgumentException("Property name must be at least 2 characters long");
+            System.out.println("[ERROR] Property name must be at least 2 characters long");
+            return false;
         }
         if (name.length() > 50) {
-            throw new IllegalArgumentException("Property name cannot exceed 50 characters");
+            System.out.println("[ERROR] Property name cannot exceed 50 characters");
+            return false;
         }
-        // Add more business rules as needed
+        return true;
     }
 
     /**
      * Validates a guest name according to system requirements.
      *
      * @param name the guest name to validate
-     * @throws IllegalArgumentException if the name is invalid
+     * @return true if valid, false otherwise
      */
-    public void validateGuestName(String name) {
-        validateNonEmpty(name);
-        if (!name.matches("^[a-zA-Z\\s]+$")) {
-            throw new IllegalArgumentException("Guest name can only contain letters and spaces");
+    public boolean validateGuestName(String name) {
+        if (!validateNonEmpty(name)) {
+            return false;
         }
+        if (!name.matches("^[a-zA-Z\\s]+$")) {
+            System.out.println("[ERROR] Guest name can only contain letters and spaces");
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -221,17 +208,21 @@ public class InputValidator {
      *
      * @param checkIn the check-in day
      * @param checkOut the check-out day
-     * @throws IllegalArgumentException if the date range is invalid
+     * @return true if valid, false otherwise
      */
-    public void validateDateRange(int checkIn, int checkOut) {
+    public boolean validateDateRange(int checkIn, int checkOut) {
         if (checkIn < 1 || checkIn >= 30) {
-            throw new IllegalArgumentException("Check-in must be between day 1 and 29");
+            System.out.println("[ERROR] Check-in must be between day 1 and 29");
+            return false;
         }
         if (checkOut <= checkIn || checkOut > 30) {
-            throw new IllegalArgumentException("Check-out must be after check-in and before day 31");
+            System.out.println("[ERROR] Check-out must be after check-in and before day 31");
+            return false;
         }
         if (checkOut - checkIn > 30) {
-            throw new IllegalArgumentException("Maximum stay is 30 days");
+            System.out.println("[ERROR] Maximum stay is 30 days");
+            return false;
         }
+        return true;
     }
 }

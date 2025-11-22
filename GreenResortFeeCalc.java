@@ -20,7 +20,6 @@ public class GreenResortFeeCalc extends Property {
      * Initializes the property type as "Green Resort".
      *
      * @param name the name of the green resort property
-     * @throws IllegalArgumentException if the name is null or empty
      */
     public GreenResortFeeCalc(String name){
         super(name);
@@ -34,7 +33,6 @@ public class GreenResortFeeCalc extends Property {
      *
      * @param basePrice the base price of the property per night
      * @return the final rate calculated as basePrice * 1.35
-     * @throws IllegalArgumentException if basePrice is negative
      */
     @Override
     public double calculateFinalRate(double basePrice){

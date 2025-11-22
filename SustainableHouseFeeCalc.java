@@ -20,7 +20,6 @@ public class SustainableHouseFeeCalc extends Property {
      * Initializes the property type as "Sustainable House".
      *
      * @param name the name of the sustainable house property
-     * @throws IllegalArgumentException if the name is null or empty
      */
     public SustainableHouseFeeCalc(String name){
         super(name);
@@ -34,7 +33,6 @@ public class SustainableHouseFeeCalc extends Property {
      *
      * @param basePrice the base price of the property per night
      * @return the final rate calculated as basePrice * 1.2
-     * @throws IllegalArgumentException if basePrice is negative
      */
     @Override
     public double calculateFinalRate(double basePrice){

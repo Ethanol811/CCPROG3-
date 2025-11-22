@@ -20,7 +20,6 @@ public class EcoApartmentFeeCalc extends Property {
      * Initializes the property type as "Eco-Apartment".
      *
      * @param name the name of the eco-apartment property
-     * @throws IllegalArgumentException if the name is null or empty
      */
     public EcoApartmentFeeCalc(String name){
         super(name);
@@ -34,7 +33,6 @@ public class EcoApartmentFeeCalc extends Property {
      *
      * @param basePrice the base price of the property per night
      * @return the final rate calculated as basePrice * 1.0
-     * @throws IllegalArgumentException if basePrice is negative
      */
     @Override
     public double calculateFinalRate(double basePrice){

@@ -20,7 +20,6 @@ public class EcoGlampingFeeCalc extends Property {
      * Initializes the property type as "Eco-Glamping".
      *
      * @param name the name of the eco-glamping property
-     * @throws IllegalArgumentException if the name is null or empty
      */
     public EcoGlampingFeeCalc(String name){
         super(name);
@@ -34,7 +33,6 @@ public class EcoGlampingFeeCalc extends Property {
      *
      * @param basePrice the base price of the property per night
      * @return the final rate calculated as basePrice * 1.5
-     * @throws IllegalArgumentException if basePrice is negative
      */
     @Override
     public double calculateFinalRate(double basePrice){
