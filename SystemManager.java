@@ -50,7 +50,7 @@ public class SystemManager {
             return;
         }
 
-        Property newProp = new Property(name);
+        Property newProp = null;
 
         System.out.print("Enter property type (Eco-Apartment, Sustainable House, Green Resort, Eco-Glamping): ");
         String propertyType = sc.nextLine().trim();
@@ -60,12 +60,23 @@ public class SystemManager {
             return;
         }
 
-        if (!(propertyType.equals("Eco-Apartment")
-                || propertyType.equals("Sustainable House")
-                || propertyType.equals("Green Resort")
-                || propertyType.equals("Eco-Glamping"))){
-            System.out.println("[ERROR] Incorrect property type.");
-            return;
+        // Create the appropriate property type
+        switch (propertyType.toLowerCase()) {
+            case "eco-apartment":
+                newProp = new EcoApartmentFeeCalc(name);
+                break;
+            case "sustainable house":
+                newProp = new SustainableHouseFeeCalc(name);
+                break;
+            case "green resort":
+                newProp = new GreenResortFeeCalc(name);
+                break;
+            case "eco-glamping":
+                newProp = new EcoGlampingFeeCalc(name);
+                break;
+            default:
+                System.out.println("[ERROR] Invalid property type.");
+                return;
         }
 
         newProp.setPropertyType(propertyType);
@@ -436,4 +447,5 @@ public class SystemManager {
             }
         }
     }
+
 }
