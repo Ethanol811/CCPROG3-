@@ -7,7 +7,7 @@
  * 
  * MCO1 - Green Property Exchange
  * @author Group 23
- * @version 2
+ * @version 3
  */
 
 import java.util.ArrayList;
@@ -19,18 +19,16 @@ public abstract class Property {
     private ArrayList<Reservation> reservations;
     private String propertyType;
 
-    /** 
-     * Default base price for all properties (PHP 1,500.00 per night).
-     * Initializes empty lists for dates and reservations.
-     * @param name  property name
-     */
-    public Property(String name) {
+    // -------------------------------------------------------
+    // Constructor
+    // -------------------------------------------------------
+    public Property(String name){
         if (name == null || name.trim().isEmpty()) {
             this.name = "Unnamed Property";
         } else {
             this.name = name.trim();
         }
-        this.basePrice = 1500.00;
+        this.basePrice = 1500.0;
         this.dates = new ArrayList<>();
         this.reservations = new ArrayList<>();
     }
@@ -38,261 +36,196 @@ public abstract class Property {
     // -------------------------------------------------------
     // Getters and Setters
     // -------------------------------------------------------
-
-    /**
-     * @return property name
-     */
-    public String getName() {
+    public String getName(){
         return name;
     }
 
-    /**
-     * Updates the property's name.
-     * Validation for unique names should be handled in SystemManager.
-     * @param newName new property name
-     */
-    public void setName(String newName) {
-        if (newName == null || newName.trim().isEmpty()) {
-            System.out.println("[ERROR] Invalid name. Property name cannot be blank.");
+    public void setName(String newName){
+        if (newName == null || newName.trim().isEmpty()){
+            System.out.println("[ERROR] Property name cannot be blank.");
         } else {
             this.name = newName.trim();
-            System.out.println("[SUCCESS] Property name successfully changed to: " + this.name);
+            System.out.println("[SUCCESS] Property name updated to: " + this.name);
         }
     }
 
-    /**
-     * @return base price per night
-     */
-    public double getBasePrice() {
+    public double getBasePrice(){
         return basePrice;
     }
 
-    /**
-     * Updates the base price for all dates.
-     * Can only be changed if there are no reservations.
-     * @param newPrice new base price (must be >= 100 PHP)
-     */
-    public void setBasePrice(double newPrice) {
-        if (newPrice < 100) {
-            System.out.println("[ERROR] New price must be at least PHP 100.00.");
-        } else if (!reservations.isEmpty()) {
+    public void setBasePrice(double newPrice){
+        if (newPrice < 100){
+            System.out.println("[ERROR] Base price must be at least PHP 100.");
+            return;
+        }
+        if (!reservations.isEmpty()){
             System.out.println("[ERROR] Cannot change base price while reservations exist.");
-        } else {
-            this.basePrice = newPrice;
-            for (Date d : dates) {
-                d.setPricePerNight(newPrice);
-            }
-            System.out.println("[SUCCESS] Base price successfully updated to PHP " + String.format("%.2f", newPrice));
+            return;
         }
+        this.basePrice = newPrice;
+
+        // Update all dates' prices based on modifier
+        for (Date d : dates){
+            d.setPricePerNight(calculateModifiedPrice(basePrice, d.getModifier()));
+        }
+        System.out.println("[SUCCESS] Base price updated.");
     }
 
-    /**
-     * @return property type
-     */
-    public String getPropertyType() {return propertyType;}
+    public String getPropertyType() {
+        return propertyType;
+    }
 
-    /**
-     * Updates the property type of a property.
-     * Can only be changed if there are no reservations.
-     * @param newPropertyType new property type
-     */
-    public void setPropertyType(String newPropertyType){
-        if (newPropertyType == null || newPropertyType.trim().isEmpty()){
-            System.out.println("[ERROR] Invalid type. Property type cannot be blank.");
-        } else if (!reservations.isEmpty()){
+    public void setPropertyType(String newType){
+        if (newType == null || newType.trim().isEmpty()){
+            System.out.println("[ERROR] Property type cannot be blank.");
+            return;
+        }
+        if (!reservations.isEmpty()){
             System.out.println("[ERROR] Cannot change property type while reservations exist.");
-        } else if (!(newPropertyType.equals("Eco-Apartment")
-                || newPropertyType.equals("Sustainable House")
-                || newPropertyType.equals("Green Resort")
-                || newPropertyType.equals("Eco-Glamping"))){
-            System.out.println("[ERROR] Invalid property type.");
-        } else {
-            this.propertyType = newPropertyType;
-            System.out.println("[SUCCESS] Property Type has been updated to: " + newPropertyType);
+            return;
         }
+        if (!(newType.equals("Eco-Apartment") || newType.equals("Sustainable House") ||
+                newType.equals("Green Resort") || newType.equals("Eco-Glamping"))){
+            System.out.println("[ERROR] Invalid property type.");
+            return;
+        }
+        this.propertyType = newType;
+        System.out.println("[SUCCESS] Property type updated to: " + this.propertyType);
     }
 
-
-    /**
-     * @return list of Date objects
-     */
-    public ArrayList<Date> getDates() {
+    public ArrayList<Date> getDates(){
         return dates;
     }
 
-    /**
-     * @return list of Reservation objects
-     */
-    public ArrayList<Reservation> getReservations() {
+    public ArrayList<Reservation> getReservations(){
         return reservations;
+    }
+
+    // -------------------------------------------------------
+    // Environmental Modifier Logic
+    // -------------------------------------------------------
+    public double calculateModifiedPrice(double basePrice, double modifier){
+        return basePrice * modifier;
+    }
+
+    public void setEnvironmentalModifier(int dayNumber, double modifier){
+        Date d = findDate(dayNumber);
+        if (d == null){
+            System.out.println("[ERROR] Day not found.");
+            return;
+        }
+        if (modifier < 0.8 || modifier > 1.2){
+            System.out.println("[ERROR] Modifier must be between 0.8 and 1.2.");
+            return;
+        }
+        d.setModifier(modifier);
+        d.setPricePerNight(calculateModifiedPrice(basePrice, modifier));
+        System.out.println("[SUCCESS] Modifier for day " + dayNumber + " set to " + modifier);
     }
 
     // -------------------------------------------------------
     // Core Property Methods
     // -------------------------------------------------------
-
-    /**
-     * Adds a new available date to the property (max 30).
-     * @param dayNumber the day number (1 – 30)
-     */
-    public void addDate(int dayNumber) {
-        if (dates.size() >= 30) {
+    public void addDate(int dayNumber, double modifier){
+        if (dates.size() >= 30){
             System.out.println("[ERROR] Cannot add more than 30 dates.");
             return;
         }
-        if (dayNumber < 1 || dayNumber > 30) {
-            System.out.println("[ERROR] Invalid day number. Must be between 1-30.");
+        if (dayNumber < 1 || dayNumber > 30){
+            System.out.println("[ERROR] Invalid day number. Must be 1–30.");
+            return;
+        }
+        if (findDate(dayNumber) != null){
+            System.out.println("[ERROR] Day " + dayNumber + " already exists.");
             return;
         }
 
-        // check for duplicates
-        for (Date d : dates) {
-            if (d.getDayNumber() == dayNumber) {
-                System.out.println("[ERROR] Day " + dayNumber + " already exists in this property.");
-                return;
-            }
-        }
-
-        dates.add(new Date(dayNumber, basePrice));
-        System.out.println("[SUCCESS] Added date " + dayNumber + " with price PHP " + String.format("%.2f", basePrice));
+        Date newDate = new Date(dayNumber, calculateModifiedPrice(basePrice, modifier), modifier);
+        dates.add(newDate);
+        System.out.println("[SUCCESS] Added Day " + dayNumber +
+                " | Base Price: PHP " + String.format("%.2f", basePrice) +
+                " | Modifier: " + modifier +
+                " | Final Price: PHP " + String.format("%.2f", newDate.getPricePerNight()));
     }
 
-    /**
-     * Removes a date by its number.
-     * @param dayNumber day number to remove
-     */
-    public void removeDate(int dayNumber) {
-        for (int i = 0; i < dates.size(); i++) {
-            Date date = dates.get(i);
-            if (date.getDayNumber() == dayNumber) {
-                if (date.isBooked()) {
-                    System.out.println("[ERROR] Cannot remove date " + dayNumber + " because it is currently booked.");
+    public void removeDate(int dayNumber){
+        for (int i = 0; i < dates.size(); i++){
+            Date d = dates.get(i);
+            if (d.getDayNumber() == dayNumber){
+                if (d.isBooked()){
+                    System.out.println("[ERROR] Cannot remove a booked date.");
                     return;
                 }
                 dates.remove(i);
-                System.out.println("[SUCCESS] Removed date " + dayNumber);
+                System.out.println("[SUCCESS] Removed day " + dayNumber);
                 return;
             }
         }
-        System.out.println("[ERROR] Date " + dayNumber + " not found in this property.");
+        System.out.println("[ERROR] Day not found.");
     }
 
-    /**
-     * Finds a date by day number.
-     * @param dayNumber the day number to find
-     * @return Date object or null if not found
-     */
-    public Date findDate(int dayNumber) {
-        for (Date date : dates) {
-            if (date.getDayNumber() == dayNumber) {
-                return date;
+    public Date findDate(int dayNumber){
+        for (Date d : dates){
+            if (d.getDayNumber() == dayNumber){
+                return d;
             }
         }
         return null;
     }
 
-    /**
-     * Checks if dates are available for booking.
-     * @param checkIn check-in day
-     * @param checkOut check-out day
-     * @return true if all dates are available, false otherwise
-     */
-    public boolean areDatesAvailable(int checkIn, int checkOut) {
-        ArrayList<Integer> unavailableDays = new ArrayList<>();
-        
-        for (int day = checkIn; day < checkOut; day++) {
-            Date date = findDate(day);
-            if (date == null) {
-                unavailableDays.add(day);
-            } else if (date.isBooked()) {
-                unavailableDays.add(day);
+    public boolean areDatesAvailable(int checkIn, int checkOut){
+        ArrayList<Integer> unavailable = new ArrayList<>();
+        for (int day = checkIn; day < checkOut; day++){
+            Date d = findDate(day);
+            if (d == null || d.isBooked()){
+                unavailable.add(day);
             }
         }
-        
-        if (!unavailableDays.isEmpty()) {
-            System.out.println("[ERROR] The following days are unavailable: " + unavailableDays);
-            if (unavailableDays.size() == 1) {
-                Date problemDate = findDate(unavailableDays.get(0));
-                if (problemDate != null && problemDate.isBooked()) {
-                    System.out.println("   Day " + unavailableDays.get(0) + " is already booked.");
-                } else {
-                    System.out.println("   Day " + unavailableDays.get(0) + " is not available in this property.");
-                }
-            }
+        if (!unavailable.isEmpty()){
+            System.out.println("[ERROR] Unavailable days: " + unavailable);
             return false;
         }
         return true;
     }
 
-    /**
-     * Books dates for a reservation.
-     * @param checkIn check-in day
-     * @param checkOut check-out day
-     */
-    public void bookDates(int checkIn, int checkOut) {
-        for (int day = checkIn; day < checkOut; day++) {
-            Date date = findDate(day);
-            if (date != null) {
-                date.book();
-                System.out.println("[DEBUG] Day " + day + " booked.");
-            }
+    public void bookDates(int checkIn, int checkOut){
+        for (int day = checkIn; day < checkOut; day++){
+            Date d = findDate(day);
+            if (d != null) d.book();
         }
     }
 
-    /**
-     * Adds a reservation to the property.
-     * @param reservation the reservation to add
-     */
-    public void addReservation(Reservation reservation) {
+    public void addReservation(Reservation reservation){
         reservations.add(reservation);
-        // Recalculate total price for this reservation
         reservation.calculateTotal(dates);
     }
 
-    /**
-     * Calculates total earnings for all reservations.
-     * @return total revenue for the property
-     */
-    public double calculateEarnings() {
+    public double calculateEarnings(){
         double total = 0;
-        for (Reservation r : reservations) {
+        for (Reservation r : reservations){
             total += r.getTotalPrice();
         }
         return total;
     }
 
-    /**
-     * Gets count of available (not booked) dates.
-     * @return number of available dates
-     */
-    public int getAvailableDateCount() {
+    public int getAvailableDateCount(){
         int count = 0;
-        for (Date date : dates) {
-            if (!date.isBooked()) {
-                count++;
-            }
+        for (Date d : dates){
+            if (!d.isBooked()) count++;
         }
         return count;
     }
 
-    /**
-     * Gets count of booked dates.
-     * @return number of booked dates
-     */
-    public int getBookedDateCount() {
+    public int getBookedDateCount(){
         int count = 0;
-        for (Date date : dates) {
-            if (date.isBooked()) {
-                count++;
-            }
-        }
+        for (Date d : dates) if (d.isBooked()) count++;
         return count;
     }
 
-    /**
-     * Displays summary info for the property.
-     */
-    public void displayInfo() {
+    // -------------------------------------------------------
+    // Display Methods
+    // -------------------------------------------------------
+    public void displayInfo(){
         System.out.println("\n=== PROPERTY INFORMATION ===");
         System.out.println("-----------------------------------");
         System.out.println("Property Name: " + name);
@@ -306,130 +239,38 @@ public abstract class Property {
         System.out.println("-----------------------------------");
     }
 
-    /**
-     * Displays calendar view of dates in a grid format similar to a planner.
-     */
-    public void displayCalendar() {
-        System.out.println("\n=== PROPERTY CALENDAR VIEW ===");
-        System.out.println("Base Price: PHP " + String.format("%.2f", basePrice) + " per night");
-        System.out.println("\n+-----------------------------+");
-        System.out.println("|        MONTH CALENDAR       |");
-        System.out.println("+-----------------------------+");
-        System.out.println("| SUN MON TUE WED THU FRI SAT |");
-        System.out.println("+-----------------------------+");
-        
-        // Start with day 1 (assuming it's Sunday for simplicity)
-        int startDay = 1;
-        
-        // Print leading spaces for the first week
-        for (int i = 1; i < startDay; i++) {
-            System.out.print("     ");
+    public void displayCalendar(){
+        System.out.println("\n=== CALENDAR ===");
+        System.out.println("Colors: Green = 80–89%, White = 100%, Yellow = 101–120% (G/W/Y)");
+        for (Date d : dates){
+            double modPct = d.getModifier() * 100;
+            String color = modPct < 100 ? "G" : (modPct == 100 ? "W" : "Y");
+            System.out.println("Day " + d.getDayNumber() +
+                    " | Price: PHP " + String.format("%.2f", d.getPricePerNight()) +
+                    " | Mod: " + String.format("%.0f", modPct) + "% | " + color +
+                    (d.isBooked() ? " | BOOKED" : ""));
         }
-        
-        // Print the calendar grid
-        for (int day = 1; day <= 30; day++) {
-            Date date = findDate(day);
-            String status = " ";
-            
-            if (date != null) {
-                if (date.isBooked()) {
-                    status = "B"; // Booked
-                } else {
-                    status = "A"; // Available
-                }
-            } else {
-                status = "-"; // Not available in property
-            }
-            
-            System.out.printf(" %2d%s ", day, status);
-            
-            // New line after Saturday
-            if ((day + startDay - 1) % 7 == 0) {
-                System.out.println();
-            }
-        }
-        System.out.println("\n+-----------------------------+");
-        System.out.println("| A = Available              |");
-        System.out.println("| B = Booked                 |");
-        System.out.println("| - = Not in property        |");
-        System.out.println("+-----------------------------+");
     }
 
-    /**
-     * Displays detailed information about a specific date.
-     * @param dayNumber the day number to display details for
-     */
-    public void displayDateInfo(int dayNumber) {
-        Date date = findDate(dayNumber);
-        if (date == null) {
-            System.out.println("[ERROR] Day " + dayNumber + " is not available in this property.");
+    public void displayDateInfo(int dayNumber){
+        Date d = findDate(dayNumber);
+        if (d == null){
+            System.out.println("[ERROR] Day not found in this property.");
             return;
         }
-        
+
         System.out.println("\n=== DATE DETAILS ===");
-        System.out.println("-----------------------------------");
         System.out.println("Day Number: " + dayNumber);
-        System.out.println("Price per night: PHP " + String.format("%.2f", date.getPricePerNight()));
-        System.out.println("Status: " + (date.isBooked() ? "BOOKED" : "AVAILABLE"));
-        
-        // Find which reservation booked this date
-        for (Reservation reservation : reservations) {
-            if (dayNumber >= reservation.getCheckIn() && dayNumber < reservation.getCheckOut()) {
-                System.out.println("Booked by: " + reservation.getGuestName());
-                System.out.println("Reservation: Day " + reservation.getCheckIn() + " to " + reservation.getCheckOut());
+        System.out.println("Price per night: PHP " + String.format("%.2f", d.getPricePerNight()));
+        System.out.println("Modifier: " + String.format("%.2f", d.getModifier()));
+        System.out.println("Status: " + (d.isBooked() ? "BOOKED" : "AVAILABLE"));
+
+        for (Reservation r : reservations){
+            if (dayNumber >= r.getCheckIn() && dayNumber < r.getCheckOut()){
+                System.out.println("Booked by: " + r.getGuestName() +
+                        " | Reservation: Day " + r.getCheckIn() + " to Day " + r.getCheckOut());
                 break;
             }
         }
-        System.out.println("-----------------------------------");
-    }
-
-    /**
-     * Displays reservation information for a selected date range.
-     * @param startDay start day of range
-     * @param endDay end day of range
-     */
-    public void displayReservationInfo(int startDay, int endDay) {
-        System.out.println("\n=== RESERVATION INFORMATION ===");
-        System.out.println("-----------------------------------");
-        System.out.println("Date Range: Day " + startDay + " to Day " + endDay);
-        
-        int availableCount = 0;
-        int bookedCount = 0;
-        int notAvailableCount = 0;
-        
-        for (int day = startDay; day <= endDay; day++) {
-            Date date = findDate(day);
-            if (date != null) {
-                if (date.isBooked()) {
-                    bookedCount++;
-                } else {
-                    availableCount++;
-                }
-            } else {
-                notAvailableCount++;
-            }
-        }
-        
-        System.out.println("Available dates: " + availableCount);
-        System.out.println("Booked dates: " + bookedCount);
-        System.out.println("Not in property: " + notAvailableCount);
-        
-        // Show reservations that overlap with this range
-        boolean foundReservations = false;
-        for (Reservation reservation : reservations) {
-            if (reservation.getCheckIn() <= endDay && reservation.getCheckOut() >= startDay) {
-                if (!foundReservations) {
-                    System.out.println("\nOVERLAPPING RESERVATIONS:");
-                    foundReservations = true;
-                }
-                reservation.displayReservation();
-            }
-        }
-        
-        if (!foundReservations) {
-            System.out.println("\n[INFO] No reservations in this date range.");
-        }
-        System.out.println("-----------------------------------");
     }
 }
-
