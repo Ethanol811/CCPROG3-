@@ -1,13 +1,13 @@
 /**
- *
  * Date.java
  *
- * Represents a date to be used by Green Property Exchange System
- * Each date has a day number, the price per night, and if the date has been booked already
+ * Represents a date in the Green Property Exchange System.
+ * Each date contains information about its day number, base price,
+ * environmental modifier, final calculated price, and booking status.
  *
  * MC01- Green Property Exchange
- * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
- * @version 1.3
+ * @author Group 23 - John Ethan Chiuten, Julian Nicos Reyes
+ * @version 2.0
  */
 
 public class Date {
@@ -18,11 +18,13 @@ public class Date {
     private boolean isBooked;
 
     /**
-     * Initializes empty day for price and booked status
-     * @param dayNumber  The exact day number
-     * @param pricePerNight  Price per night in a specific day
+     * Constructs a new Date with the specified parameters.
+     * @param dayNumber the day number (1-30)
+     * @param basePrice the base price before modifiers
+     * @param modifier the environmental modifier (0.8-1.2)
      */
-    public Date(int dayNumber, double basePrice, double modifier){
+    public Date(int dayNumber, double basePrice, double modifier) {
+        validateInputs(dayNumber, basePrice, modifier);
         this.dayNumber = dayNumber;
         this.basePrice = basePrice;
         this.modifier = modifier;
@@ -30,73 +32,139 @@ public class Date {
         this.isBooked = false;
     }
 
+    /**
+     * Validates constructor inputs for a Date instance.
+     * @param dayNumber the day number to validate
+     * @param basePrice the base price to validate
+     * @param modifier the modifier to validate
+     */
+    private void validateInputs(int dayNumber, double basePrice, double modifier) {
+        if (dayNumber < 1 || dayNumber > 30) {
+            throw new IllegalArgumentException("Day number must be between 1 and 30");
+        }
+        if (basePrice < 0) {
+            throw new IllegalArgumentException("Base price cannot be negative");
+        }
+        if (modifier < 0.8 || modifier > 1.2) {
+            throw new IllegalArgumentException("Modifier must be between 0.8 and 1.2");
+        }
+    }
+
     // Getters
 
     /**
-     *
-     * @return Day Number
+     * Returns the day number of this date.
+     * @return the day number
      */
-    public int getDayNumber(){
+    public int getDayNumber() {
         return dayNumber;
     }
 
     /**
-     *
-     * @return If a date is booked
+     * Returns the booking status of this date.
+     * @return true if the date is booked, false otherwise
      */
-    public boolean isBooked(){
+    public boolean isBooked() {
         return isBooked;
     }
 
     /**
-     * Gets the base price per night.
-     * @return Base price per night
+     * Returns the base price of this date.
+     * @return the base price
      */
-    public double getBasePrice(){
+    public double getBasePrice() {
         return basePrice;
     }
 
     /**
-     * Returns final price with environmental modifier in consideration.
-     * @return Final price with modifier applied
+     * Returns the final price of this date.
+     * @return the final price
      */
-    public double getFinalPrice(){
+    public double getFinalPrice() {
         return finalPrice;
     }
 
     /**
-     *
-     * @return Environmental modifier of a specific day
+     * Returns the environmental modifier of this date.
+     * @return the environmental modifier
      */
-    public double getModifier(){
+    public double getModifier() {
         return modifier;
+    }
+
+    /**
+     * Returns the price per night.
+     * @return the price per night
+     */
+    public double getPricePerNight() {
+        return finalPrice;
     }
 
     // Setters
 
     /**
-     *
-     * @param newBasePrice New base price after system management
+     * Sets the base price and recalculates the final price.
+     * @param newBasePrice the new base price
      */
     public void updatePrice(double newBasePrice) {
+        if (newBasePrice < 0) {
+            throw new IllegalArgumentException("Base price cannot be negative");
+        }
         this.basePrice = newBasePrice;
         this.finalPrice = newBasePrice * modifier;
     }
 
-    // Booking Methods
     /**
-     * Updates isBooked to true after a successful booking
+     * Sets the environmental modifier and recalculates the final price.
+     * @param modifier the new environmental modifier
      */
-    public void book(){
+    public void setModifier(double modifier) {
+        if (modifier < 0.8 || modifier > 1.2) {
+            throw new IllegalArgumentException("Modifier must be between 0.8 and 1.2");
+        }
+        this.modifier = modifier;
+        this.finalPrice = basePrice * modifier;
+    }
+
+    /**
+     * Sets the price per night directly.
+     * @param pricePerNight the new price per night
+     */
+    public void setPricePerNight(double pricePerNight) {
+        this.finalPrice = pricePerNight;
+    }
+
+    // Booking Methods
+
+    /**
+     * Books this date.
+     * @throws IllegalStateException if the date is already booked
+     */
+    public void book() {
+        if (isBooked) {
+            throw new IllegalStateException("Date is already booked");
+        }
         isBooked = true;
     }
 
     /**
-     * Updates isBooked to false if a booking fails
+     * Unbooks this date.
+     * @throws IllegalStateException if the date is not booked
      */
-    public void unbook(){
+    public void unbook() {
+        if (!isBooked) {
+            throw new IllegalStateException("Date is not booked");
+        }
         isBooked = false;
     }
+
+    /**
+     * Returns a string representation of the date.
+     * @return string representation of the date
+     */
+    @Override
+    public String toString() {
+        return "Date{day=" + dayNumber + ", basePrice=" + basePrice + ", modifier=" + modifier +
+                ", finalPrice=" + finalPrice + ", booked=" + isBooked + "}";
+    }
 }
-
-

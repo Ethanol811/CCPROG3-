@@ -1,17 +1,37 @@
 /**
  * Driver.java
- * 
+ *
  * Main entry point for the Green Property Exchange console simulation.
  * Provides navigation for creating, viewing, managing, and booking properties.
- * 
+ *
+ * This class serves as the user interface controller, coordinating between
+ * the user and the SystemManager to provide a seamless property management
+ * and booking experience.
+ *
  * MCO1 - Green Property Exchange
- * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
+ * @author Group 23 - John Ethan Chiuten, Julian Nicos Reyes
  * @version 1.6
  */
 
 import java.util.Scanner;
 
 public class Driver {
+
+    /**
+     * Main method that serves as the entry point for the Green Property Exchange application.
+     * Displays a console-based menu system and handles user interactions for property
+     * management and booking operations.
+     *
+     * The application runs in a loop until the user chooses to exit, providing
+     * options to:
+     * - Create new property listings
+     * - View existing property details
+     * - Manage property configurations
+     * - Simulate booking operations
+     * - Exit the system
+     *
+     * @param args command line arguments (not used in this application)
+     */
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         SystemManager manager = new SystemManager();

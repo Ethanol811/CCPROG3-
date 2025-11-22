@@ -87,10 +87,13 @@ public class Reservation {
         totalPrice = 0;
         breakdown.clear();
 
-        for (Date d : dates) {
-            if (d.getDayNumber() >= checkIn && d.getDayNumber() < checkOut) {
-                totalPrice += d.getPricePerNight();
-                breakdown.add(d.getPricePerNight());
+        for (int day = checkIn; day < checkOut; day++) {
+            for (Date d : dates) {
+                if (d.getDayNumber() == day) {
+                    totalPrice += d.getFinalPrice();
+                    breakdown.add(d.getFinalPrice());
+                    break;
+                }
             }
         }
     }
@@ -112,20 +115,5 @@ public class Reservation {
             System.out.printf("   Day %2d: PHP %8.2f%n", (checkIn + i), breakdown.get(i));
         }
         System.out.println("-----------------------------------");
-    }
-
-    public static void main(String[] args) {
-        // Create some sample dates
-        ArrayList<Date> allDates = new ArrayList<>();
-        allDates.add(new Date(1, 1000));
-        allDates.add(new Date(2, 1000));
-        allDates.add(new Date(3, 1000));
-        allDates.add(new Date(4, 1000));
-        allDates.add(new Date(5, 1000));
-
-        // Create and calculate a reservation
-        Reservation r = new Reservation("John Lim", 2, 2);
-        r.calculateTotal(allDates);
-        r.displayReservation(); // ← Call your display me
     }
 }
