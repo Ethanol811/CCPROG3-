@@ -11,18 +11,12 @@
  */
 
 import java.util.ArrayList;
-import java.util.List;
 
 public abstract class Property {
-    /** Minimum allowed base price for a property */
     private static final double MIN_BASE_PRICE = 100.0;
-    /** Maximum allowed base price for a property */
     private static final double MAX_BASE_PRICE = 999999.0;
-    /** Maximum number of dates a property can have */
     private static final int MAX_DATES = 30;
-    /** Minimum environmental modifier value */
     private static final double MIN_MODIFIER = 0.8;
-    /** Maximum environmental modifier value */
     private static final double MAX_MODIFIER = 1.2;
 
     private String name;
@@ -36,64 +30,11 @@ public abstract class Property {
      * @param name the name of the property
      */
     protected Property(String name) {
-        validateName(name);
         this.name = name.trim();
         this.basePrice = 1500.0;
         this.dates = new ArrayList<Date>();
         this.reservations = new ArrayList<Reservation>();
         this.propertyType = "";
-    }
-
-    /**
-     * Validates the property name meets system requirements.
-     * @param name the name to validate
-     */
-    private void validateName(String name) {
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Property name cannot be null or empty");
-        }
-        if (name.trim().length() < 2) {
-            throw new IllegalArgumentException("Property name must be at least 2 characters long");
-        }
-    }
-
-    /**
-     * Validates that a price is within acceptable bounds.
-     * @param price the price to validate
-     */
-    private void validatePrice(double price) {
-        if (price < MIN_BASE_PRICE || price > MAX_BASE_PRICE) {
-            throw new IllegalArgumentException("Price must be between PHP " + MIN_BASE_PRICE + " and PHP " + MAX_BASE_PRICE);
-        }
-    }
-
-    /**
-     * Validates that a day number is within the 1-30 range.
-     * @param dayNumber the day number to validate
-     */
-    private void validateDayNumber(int dayNumber) {
-        if (dayNumber < 1 || dayNumber > MAX_DATES) {
-            throw new IllegalArgumentException("Day number must be between 1 and " + MAX_DATES);
-        }
-    }
-
-    /**
-     * Validates that an environmental modifier is within acceptable bounds.
-     * @param modifier the modifier to validate
-     */
-    private void validateModifier(double modifier) {
-        if (modifier < MIN_MODIFIER || modifier > MAX_MODIFIER) {
-            throw new IllegalArgumentException("Modifier must be between " + MIN_MODIFIER + " and " + MAX_MODIFIER);
-        }
-    }
-
-    /**
-     * Validates that no reservations exist on the property.
-     */
-    private void validateReservationConstraints() {
-        if (!reservations.isEmpty()) {
-            throw new IllegalStateException("Cannot modify property with active reservations");
-        }
     }
 
     /**
@@ -118,8 +59,18 @@ public abstract class Property {
      * @param newName the new name for the property
      */
     public void setName(String newName) {
-        validateName(newName);
-        validateReservationConstraints();
+        if (newName == null || newName.trim().isEmpty()) {
+            System.out.println("[ERROR] Property name cannot be null or empty");
+            return;
+        }
+        if (newName.trim().length() < 2) {
+            System.out.println("[ERROR] Property name must be at least 2 characters long");
+            return;
+        }
+        if (!reservations.isEmpty()) {
+            System.out.println("[ERROR] Cannot modify property with active reservations");
+            return;
+        }
         this.name = newName.trim();
     }
 
@@ -136,8 +87,14 @@ public abstract class Property {
      * @param newPrice the new base price
      */
     public void setBasePrice(double newPrice) {
-        validatePrice(newPrice);
-        validateReservationConstraints();
+        if (newPrice < MIN_BASE_PRICE || newPrice > MAX_BASE_PRICE) {
+            System.out.println("[ERROR] Price must be between PHP " + MIN_BASE_PRICE + " and PHP " + MAX_BASE_PRICE);
+            return;
+        }
+        if (!reservations.isEmpty()) {
+            System.out.println("[ERROR] Cannot modify property with active reservations");
+            return;
+        }
 
         this.basePrice = newPrice;
         updateAllDatePrices();
@@ -157,9 +114,13 @@ public abstract class Property {
      */
     public void setPropertyType(String newType) {
         if (newType == null || newType.trim().isEmpty()) {
-            throw new IllegalArgumentException("Property type cannot be null or empty");
+            System.out.println("[ERROR] Property type cannot be null or empty");
+            return;
         }
-        validateReservationConstraints();
+        if (!reservations.isEmpty()) {
+            System.out.println("[ERROR] Cannot modify property with active reservations");
+            return;
+        }
         this.propertyType = newType.trim();
     }
 
@@ -185,12 +146,19 @@ public abstract class Property {
      * @param modifier the new environmental modifier
      */
     public void setEnvironmentalModifier(int dayNumber, double modifier) {
-        validateDayNumber(dayNumber);
-        validateModifier(modifier);
+        if (dayNumber < 1 || dayNumber > MAX_DATES) {
+            System.out.println("[ERROR] Day number must be between 1 and " + MAX_DATES);
+            return;
+        }
+        if (modifier < MIN_MODIFIER || modifier > MAX_MODIFIER) {
+            System.out.println("[ERROR] Modifier must be between " + MIN_MODIFIER + " and " + MAX_MODIFIER);
+            return;
+        }
 
         Date date = findDate(dayNumber);
         if (date == null) {
-            throw new IllegalArgumentException("Day " + dayNumber + " not found in property");
+            System.out.println("[ERROR] Day " + dayNumber + " not found in property");
+            return;
         }
 
         date.setModifier(modifier);
@@ -213,18 +181,25 @@ public abstract class Property {
      * @param modifier the environmental modifier
      */
     public void addDate(int dayNumber, double modifier) {
-        validateDayNumber(dayNumber);
-        validateModifier(modifier);
+        if (dayNumber < 1 || dayNumber > MAX_DATES) {
+            System.out.println("[ERROR] Day number must be between 1 and " + MAX_DATES);
+            return;
+        }
+        if (modifier < MIN_MODIFIER || modifier > MAX_MODIFIER) {
+            System.out.println("[ERROR] Modifier must be between " + MIN_MODIFIER + " and " + MAX_MODIFIER);
+            return;
+        }
 
         if (dates.size() >= MAX_DATES) {
-            throw new IllegalStateException("Cannot add more than " + MAX_DATES + " dates");
+            System.out.println("[ERROR] Cannot add more than " + MAX_DATES + " dates");
+            return;
         }
 
         if (findDate(dayNumber) != null) {
-            throw new IllegalArgumentException("Day " + dayNumber + " already exists in property");
+            System.out.println("[ERROR] Day " + dayNumber + " already exists in property");
+            return;
         }
 
-        double finalPrice = calculateFinalRate(basePrice) * modifier;
         Date newDate = new Date(dayNumber, calculateFinalRate(basePrice), modifier);
         dates.add(newDate);
     }
@@ -234,19 +209,24 @@ public abstract class Property {
      * @param dayNumber the day number to remove
      */
     public void removeDate(int dayNumber) {
-        validateDayNumber(dayNumber);
+        if (dayNumber < 1 || dayNumber > MAX_DATES) {
+            System.out.println("[ERROR] Day number must be between 1 and " + MAX_DATES);
+            return;
+        }
 
         for (int i = 0; i < dates.size(); i++) {
             Date date = dates.get(i);
             if (date.getDayNumber() == dayNumber) {
                 if (date.isBooked()) {
-                    throw new IllegalStateException("Cannot remove booked date: " + dayNumber);
+                    System.out.println("[ERROR] Cannot remove booked date: " + dayNumber);
+                    return;
                 }
                 dates.remove(i);
+                System.out.println("[SUCCESS] Date removed successfully");
                 return;
             }
         }
-        throw new IllegalArgumentException("Day " + dayNumber + " not found in property");
+        System.out.println("[ERROR] Day " + dayNumber + " not found in property");
     }
 
     /**
@@ -270,7 +250,9 @@ public abstract class Property {
      * @return true if all dates are available, false otherwise
      */
     public boolean areDatesAvailable(int checkIn, int checkOut) {
-        validateDateRange(checkIn, checkOut);
+        if (!validateDateRange(checkIn, checkOut)) {
+            return false;
+        }
 
         for (int day = checkIn; day < checkOut; day++) {
             Date date = findDate(day);
@@ -288,9 +270,11 @@ public abstract class Property {
      * @return list of unavailable day numbers
      */
     public ArrayList<Integer> getUnavailableDays(int checkIn, int checkOut) {
-        validateDateRange(checkIn, checkOut);
-
         ArrayList<Integer> unavailable = new ArrayList<Integer>();
+        if (!validateDateRange(checkIn, checkOut)) {
+            return unavailable;
+        }
+
         for (int day = checkIn; day < checkOut; day++) {
             Date date = findDate(day);
             if (date == null || date.isBooked()) {
@@ -304,17 +288,18 @@ public abstract class Property {
      * Validates that a date range is acceptable for booking.
      * @param checkIn the check-in day
      * @param checkOut the check-out day
+     * @return true if valid, false otherwise
      */
-    private void validateDateRange(int checkIn, int checkOut) {
+    private boolean validateDateRange(int checkIn, int checkOut) {
         if (checkIn < 1 || checkIn >= checkOut || checkOut > MAX_DATES + 1) {
-            throw new IllegalArgumentException("Invalid date range: checkIn=" + checkIn + ", checkOut=" + checkOut);
+            System.out.println("[ERROR] Invalid date range: checkIn=" + checkIn + ", checkOut=" + checkOut);
+            return false;
         }
         if (checkIn == MAX_DATES) {
-            throw new IllegalArgumentException("Cannot check-in on day " + MAX_DATES);
+            System.out.println("[ERROR] Cannot check-in on day " + MAX_DATES);
+            return false;
         }
-        if (checkOut == 1) {
-            throw new IllegalArgumentException("Cannot check-out on day 1");
-        }
+        return true;
     }
 
     /**
@@ -325,7 +310,8 @@ public abstract class Property {
     public void bookDates(int checkIn, int checkOut) {
         if (!areDatesAvailable(checkIn, checkOut)) {
             ArrayList<Integer> unavailable = getUnavailableDays(checkIn, checkOut);
-            throw new IllegalStateException("Dates not available: " + unavailable);
+            System.out.println("[ERROR] Dates not available: " + unavailable);
+            return;
         }
 
         for (int day = checkIn; day < checkOut; day++) {
@@ -342,7 +328,8 @@ public abstract class Property {
      */
     public void addReservation(Reservation reservation) {
         if (reservation == null) {
-            throw new IllegalArgumentException("Reservation cannot be null");
+            System.out.println("[ERROR] Reservation cannot be null");
+            return;
         }
         reservations.add(reservation);
         reservation.calculateTotal(dates);
@@ -433,39 +420,51 @@ public abstract class Property {
      * Displays a calendar view of all dates.
      */
     public void displayCalendar() {
-        System.out.println("\n=== CALENDAR VIEW ===");
-        System.out.println("Legend: [G]reen=80-89%  [W]hite=100%  [Y]ellow=101-120%  [B]ooked");
-        System.out.println("-----------------------------------");
+        System.out.println("\n+-----------------------------+");
+        System.out.println("|        MONTH CALENDAR       |");
+        System.out.println("+-----------------------------+");
+        System.out.println("| SUN MON TUE WED THU FRI SAT |");
+        System.out.println("+-----------------------------+");
 
-        if (dates.isEmpty()) {
-            System.out.println("No dates available for this property.");
-            return;
+        int firstDayOfWeek = 0; // 0 = Sunday
+
+        for (int i = 0; i < firstDayOfWeek; i++) {
+            System.out.print("     ");
         }
 
-        for (Date date : dates) {
-            double modPct = date.getModifier() * 100;
-            String colorCode = getColorCode(modPct);
-            String status = date.isBooked() ? "BOOKED" : "AVAILABLE";
+        for (int day = 1; day <= 30; day++) {
+            Date date = findDate(day);
+            String status = " ";
 
-            System.out.printf("Day %2d | Price: PHP %8.2f | Mod: %3.0f%% | %s | %s%n",
-                    date.getDayNumber(),
-                    date.getFinalPrice(),
-                    modPct,
-                    colorCode,
-                    status
-            );
+            if (date != null) {
+                if (date.isBooked()) {
+                    status = "B";
+                } else {
+                    status = "A";
+                }
+
+                double modPct = date.getModifier() * 100;
+                if (modPct < 90) {
+                    status += "G";
+                } else if (modPct == 100) {
+                    status += "W";
+                } else {
+                    status += "Y";
+                }
+            } else {
+                status = "  ";
+            }
+
+            System.out.printf("%3s%s", day, status);
+
+            if ((day + firstDayOfWeek) % 7 == 0) {
+                System.out.println();
+            }
         }
-    }
 
-    /**
-     * Determines the color code for environmental impact display.
-     * @param modifierPercentage the environmental modifier as a percentage
-     * @return color code string
-     */
-    private String getColorCode(double modifierPercentage) {
-        if (modifierPercentage < 90) return "G";
-        if (modifierPercentage == 100) return "W";
-        return "Y";
+        System.out.println("\n+-----------------------------+");
+        System.out.println("Legend: A=Available, B=Booked");
+        System.out.println("Color: G=Green(80-89%), W=White(100%), Y=Yellow(101-120%)");
     }
 
     /**
@@ -486,7 +485,6 @@ public abstract class Property {
         System.out.println("Modifier: " + String.format("%.2f", date.getModifier()));
         System.out.println("Status: " + (date.isBooked() ? "BOOKED" : "AVAILABLE"));
 
-        // Find reservation for this date
         for (Reservation reservation : reservations) {
             if (dayNumber >= reservation.getCheckIn() && dayNumber < reservation.getCheckOut()) {
                 System.out.println("Booked by: " + reservation.getGuestName());
@@ -502,13 +500,15 @@ public abstract class Property {
      * @param endDay the end day of the range
      */
     public void displayReservationInfo(int startDay, int endDay) {
-        validateDateRange(startDay, endDay + 1);
+        if (!validateDateRange(startDay, endDay + 1)) {
+            return;
+        }
 
         System.out.println("\n=== RESERVATIONS FOR DAYS " + startDay + " TO " + endDay + " ===");
 
         boolean found = false;
         for (Reservation reservation : reservations) {
-            if (overlapsWithRange(reservation, startDay, endDay)) {
+            if (reservation.getCheckIn() <= endDay && reservation.getCheckOut() > startDay) {
                 reservation.displayReservation();
                 found = true;
             }
@@ -517,17 +517,6 @@ public abstract class Property {
         if (!found) {
             System.out.println("No reservations found in the specified date range.");
         }
-    }
-
-    /**
-     * Checks if a reservation overlaps with a date range.
-     * @param reservation the reservation to check
-     * @param startDay the start day of the range
-     * @param endDay the end day of the range
-     * @return true if the reservation overlaps with the range
-     */
-    private boolean overlapsWithRange(Reservation reservation, int startDay, int endDay) {
-        return (reservation.getCheckIn() <= endDay && reservation.getCheckOut() > startDay);
     }
 
     /**

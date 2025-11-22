@@ -24,30 +24,11 @@ public class Date {
      * @param modifier the environmental modifier (0.8-1.2)
      */
     public Date(int dayNumber, double basePrice, double modifier) {
-        validateInputs(dayNumber, basePrice, modifier);
         this.dayNumber = dayNumber;
         this.basePrice = basePrice;
         this.modifier = modifier;
         this.finalPrice = basePrice * modifier;
         this.isBooked = false;
-    }
-
-    /**
-     * Validates constructor inputs for a Date instance.
-     * @param dayNumber the day number to validate
-     * @param basePrice the base price to validate
-     * @param modifier the modifier to validate
-     */
-    private void validateInputs(int dayNumber, double basePrice, double modifier) {
-        if (dayNumber < 1 || dayNumber > 30) {
-            throw new IllegalArgumentException("Day number must be between 1 and 30");
-        }
-        if (basePrice < 0) {
-            throw new IllegalArgumentException("Base price cannot be negative");
-        }
-        if (modifier < 0.8 || modifier > 1.2) {
-            throw new IllegalArgumentException("Modifier must be between 0.8 and 1.2");
-        }
     }
 
     // Getters
@@ -108,7 +89,8 @@ public class Date {
      */
     public void updatePrice(double newBasePrice) {
         if (newBasePrice < 0) {
-            throw new IllegalArgumentException("Base price cannot be negative");
+            System.out.println("[ERROR] Base price cannot be negative");
+            return;
         }
         this.basePrice = newBasePrice;
         this.finalPrice = newBasePrice * modifier;
@@ -120,7 +102,8 @@ public class Date {
      */
     public void setModifier(double modifier) {
         if (modifier < 0.8 || modifier > 1.2) {
-            throw new IllegalArgumentException("Modifier must be between 0.8 and 1.2");
+            System.out.println("[ERROR] Modifier must be between 0.8 and 1.2");
+            return;
         }
         this.modifier = modifier;
         this.finalPrice = basePrice * modifier;
@@ -138,22 +121,22 @@ public class Date {
 
     /**
      * Books this date.
-     * @throws IllegalStateException if the date is already booked
      */
     public void book() {
         if (isBooked) {
-            throw new IllegalStateException("Date is already booked");
+            System.out.println("[ERROR] Date is already booked");
+            return;
         }
         isBooked = true;
     }
 
     /**
      * Unbooks this date.
-     * @throws IllegalStateException if the date is not booked
      */
     public void unbook() {
         if (!isBooked) {
-            throw new IllegalStateException("Date is not booked");
+            System.out.println("[ERROR] Date is not booked");
+            return;
         }
         isBooked = false;
     }
