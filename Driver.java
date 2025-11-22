@@ -34,7 +34,7 @@ public class Driver {
      */
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        SystemManager manager = new SystemManager();
+        SystemManager manager = new SystemManager(sc);  // Pass Scanner to SystemManager
 
         int choice;
         do {

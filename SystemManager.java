@@ -19,9 +19,9 @@ public class SystemManager {
     /**
      * Constructs a new SystemManager with empty property list.
      */
-    public SystemManager() {
+    public SystemManager(Scanner scanner) {
         this.properties = new ArrayList<Property>();
-        this.sc = new Scanner(System.in);
+        this.sc = scanner;
     }
 
     /**
