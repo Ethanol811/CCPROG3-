@@ -2,32 +2,32 @@
  * Date.java
  *
  * Represents a date in the Green Property Exchange System.
- * Each date contains information about its day number, base price,
+ * Each date contains information about its day number, property rate,
  * environmental modifier, final calculated price, and booking status.
  *
- * MC01- Green Property Exchange
+ * MC02- Green Property Exchange
  * @author Group 23 - John Ethan Chiuten, Julian Nicos Reyes
- * @version 2.0
+ * @version 3.0
  */
 
 public class Date {
     private int dayNumber;
-    private double basePrice;
-    private double modifier;
-    private double finalPrice;
+    private double propertyRate;  // Base price × property type multiplier
+    private double modifier;      // Environmental modifier (0.8-1.2)
+    private double finalPrice;    // propertyRate × modifier
     private boolean isBooked;
 
     /**
      * Constructs a new Date with the specified parameters.
      * @param dayNumber the day number (1-30)
-     * @param basePrice the base price before modifiers
+     * @param propertyRate the property rate (already includes property type multiplier)
      * @param modifier the environmental modifier (0.8-1.2)
      */
-    public Date(int dayNumber, double basePrice, double modifier) {
+    public Date(int dayNumber, double propertyRate, double modifier) {
         this.dayNumber = dayNumber;
-        this.basePrice = basePrice;
+        this.propertyRate = propertyRate;
         this.modifier = modifier;
-        this.finalPrice = basePrice * modifier;
+        this.finalPrice = propertyRate * modifier;
         this.isBooked = false;
     }
 
@@ -50,15 +50,15 @@ public class Date {
     }
 
     /**
-     * Returns the base price of this date.
-     * @return the base price
+     * Returns the property rate of this date (includes property type multiplier).
+     * @return the property rate
      */
     public double getBasePrice() {
-        return basePrice;
+        return propertyRate;
     }
 
     /**
-     * Returns the final price of this date.
+     * Returns the final price of this date (property rate × environmental modifier).
      * @return the final price
      */
     public double getFinalPrice() {
@@ -74,7 +74,7 @@ public class Date {
     }
 
     /**
-     * Returns the price per night.
+     * Returns the price per night (final price).
      * @return the price per night
      */
     public double getPricePerNight() {
@@ -84,16 +84,16 @@ public class Date {
     // Setters
 
     /**
-     * Sets the base price and recalculates the final price.
-     * @param newBasePrice the new base price
+     * Sets the property rate and recalculates the final price.
+     * @param newPropertyRate the new property rate (includes property type multiplier)
      */
-    public void updatePrice(double newBasePrice) {
-        if (newBasePrice < 0) {
-            System.out.println("[ERROR] Base price cannot be negative");
+    public void updatePrice(double newPropertyRate) {
+        if (newPropertyRate < 0) {
+            System.out.println("[ERROR] Property rate cannot be negative");
             return;
         }
-        this.basePrice = newBasePrice;
-        this.finalPrice = newBasePrice * modifier;
+        this.propertyRate = newPropertyRate;
+        this.finalPrice = newPropertyRate * modifier;
     }
 
     /**
@@ -106,7 +106,7 @@ public class Date {
             return;
         }
         this.modifier = modifier;
-        this.finalPrice = basePrice * modifier;
+        this.finalPrice = propertyRate * modifier;
     }
 
     /**
@@ -147,7 +147,7 @@ public class Date {
      */
     @Override
     public String toString() {
-        return "Date{day=" + dayNumber + ", basePrice=" + basePrice + ", modifier=" + modifier +
+        return "Date{day=" + dayNumber + ", propertyRate=" + propertyRate + ", modifier=" + modifier +
                 ", finalPrice=" + finalPrice + ", booked=" + isBooked + "}";
     }
 }

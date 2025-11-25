@@ -1,46 +1,66 @@
 /**
  * Driver.java
  *
- * Main entry point for the Green Property Exchange console simulation.
- * Provides navigation for creating, viewing, managing, and booking properties.
+ * Main entry point for the Green Property Exchange MCO2 GUI application.
+ * Launches the Swing-based GUI interface instead of the console version.
  *
- * This class serves as the user interface controller, coordinating between
- * the user and the SystemManager to provide a seamless property management
- * and booking experience.
- *
- * MCO1 - Green Property Exchange
+ * MCO2 - Green Property Exchange
  * @author Group 23 - John Ethan Chiuten, Julian Nicos Reyes
- * @version 1.6
+ * @version 2.0
  */
 
-import java.util.Scanner;
+import javax.swing.*;
 
 public class Driver {
 
     /**
-     * Main method that serves as the entry point for the Green Property Exchange application.
-     * Displays a console-based menu system and handles user interactions for property
-     * management and booking operations.
-     *
-     * The application runs in a loop until the user chooses to exit, providing
-     * options to:
-     * - Create new property listings
-     * - View existing property details
-     * - Manage property configurations
-     * - Simulate booking operations
-     * - Exit the system
+     * Main method that serves as the entry point for the Green Property Exchange MCO2 GUI application.
+     * Launches the Swing-based user interface with enhanced calendar view and mouse controls.
      *
      * @param args command line arguments (not used in this application)
      */
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        SystemManager manager = new SystemManager(sc);  // Pass Scanner to SystemManager
+        // Set system look and feel for native appearance
+        try {
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+        } catch (Exception e) {
+            System.err.println("Warning: Could not set system look and feel. Using default.");
+        }
+
+        // Launch the GUI application on the Event Dispatch Thread
+        SwingUtilities.invokeLater(() -> {
+            try {
+                // Create and display the main application frame
+                MainFrame mainFrame = new MainFrame();
+                mainFrame.setVisible(true);
+                
+                System.out.println("Green Property Exchange MCO2 GUI launched successfully!");
+                
+            } catch (Exception e) {
+                // Fallback to console version if GUI fails
+                System.err.println("GUI initialization failed: " + e.getMessage());
+                System.err.println("Falling back to console version...");
+                
+                // Launch console version as backup
+                launchConsoleVersion();
+            }
+        });
+    }
+
+    /**
+     * Fallback method to launch the console version if GUI initialization fails.
+     */
+    private static void launchConsoleVersion() {
+        System.out.println("\n=== LAUNCHING CONSOLE VERSION ===");
+        
+        java.util.Scanner sc = new java.util.Scanner(System.in);
+        SystemManager manager = new SystemManager(sc);
 
         int choice;
         do {
             System.out.println("\n==================================");
             System.out.println("    GREEN PROPERTY EXCHANGE");
-            System.out.println("           MCO1 SYSTEM");
+            System.out.println("     MCO2 - CONSOLE VERSION");
             System.out.println("==================================");
             System.out.println("1. Create Property");
             System.out.println("2. View Property");
@@ -52,7 +72,7 @@ public class Driver {
 
             while (!sc.hasNextInt()) {
                 System.out.print("[ERROR] Invalid input. Enter a number (1-5): ");
-                sc.next(); // discard invalid input
+                sc.next();
             }
 
             choice = sc.nextInt();

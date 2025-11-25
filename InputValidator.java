@@ -5,7 +5,7 @@
  * Provides comprehensive validation methods for various input types and domain-specific rules.
  *
  * MCO1 - Green Property Exchange
- * @author Group 23
+ * @author Group 23 - John Ethan Chiuten, Julian Nicos Reyes
  * @version 1.0
  */
 

@@ -2,11 +2,11 @@
  * SystemManager.java
  *
  * Main controller class for the Green Property Exchange system.
- * Handles property management, booking simulation, and user interaction.
+ * Updated for MCO2 with GUI support and proper price calculations.
  *
- * MCO1 - Green Property Exchange
+ * MCO2 - Green Property Exchange
  * @author Group 23 - John Ethan Chiuten, Julian Nicos Reyes
- * @version 2.0
+ * @version 4.1
  */
 
 import java.util.ArrayList;
@@ -18,11 +18,166 @@ public class SystemManager {
 
     /**
      * Constructs a new SystemManager with empty property list.
+     * @param scanner the Scanner for input (can be null for GUI mode)
      */
     public SystemManager(Scanner scanner) {
         this.properties = new ArrayList<Property>();
         this.sc = scanner;
     }
+
+    /**
+     * Constructs a new SystemManager for GUI mode (no Scanner needed).
+     */
+    public SystemManager() {
+        this.properties = new ArrayList<Property>();
+        this.sc = null;
+    }
+
+    // GUI Helper Methods
+
+    /**
+     * Gets all properties in the system for GUI display.
+     * @return list of all properties
+     */
+    public ArrayList<Property> getAllProperties() {
+        return properties;
+    }
+
+    /**
+     * Gets property names for GUI dropdowns.
+     * @return array of property names
+     */
+    public String[] getPropertyNames() {
+        String[] names = new String[properties.size()];
+        for (int i = 0; i < properties.size(); i++) {
+            names[i] = properties.get(i).getName();
+        }
+        return names;
+    }
+
+    /**
+     * Creates a property with GUI parameters.
+     * @param name the property name
+     * @param propertyType the type of property
+     * @param basePrice the base price
+     * @return true if creation successful, false otherwise
+     */
+    public boolean createPropertyGUI(String name, String propertyType, double basePrice) {
+        try {
+            if (name == null || name.trim().isEmpty()) {
+                return false;
+            }
+
+            if (findProperty(name) != null) {
+                return false;
+            }
+
+            Property newProp = createPropertyByType(name, propertyType);
+            if (newProp == null) {
+                return false;
+            }
+
+            newProp.setPropertyType(propertyType);
+            newProp.setBasePrice(basePrice);
+            properties.add(newProp);
+
+            // Show the calculated property rate
+            System.out.println("[SUCCESS] Property '" + name + "' created with rate: PHP " +
+                    String.format("%.2f", newProp.getPropertyRate()));
+            return true;
+
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Adds dates to a property for GUI.
+     * @param propertyName the property name
+     * @param dates array of day numbers to add
+     * @return true if successful, false otherwise
+     */
+    public boolean addDatesToPropertyGUI(String propertyName, int[] dates) {
+        Property prop = findProperty(propertyName);
+        if (prop == null) return false;
+
+        try {
+            for (int day : dates) {
+                prop.addDate(day);
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Checks if dates are available for booking (GUI version).
+     * @param propertyName the property name
+     * @param checkIn the check-in day
+     * @param checkOut the check-out day
+     * @return true if dates are available, false otherwise
+     */
+    public boolean areDatesAvailableGUI(String propertyName, int checkIn, int checkOut) {
+        Property prop = findProperty(propertyName);
+        if (prop == null) return false;
+        return prop.areDatesAvailable(checkIn, checkOut);
+    }
+
+    /**
+     * Gets unavailable days for a date range (GUI version).
+     * @param propertyName the property name
+     * @param checkIn the check-in day
+     * @param checkOut the check-out day
+     * @return list of unavailable days
+     */
+    public ArrayList<Integer> getUnavailableDaysGUI(String propertyName, int checkIn, int checkOut) {
+        Property prop = findProperty(propertyName);
+        if (prop == null) return new ArrayList<Integer>();
+        return prop.getUnavailableDays(checkIn, checkOut);
+    }
+
+    /**
+     * Calculates price for a booking (GUI version).
+     * @param propertyName the property name
+     * @param checkIn the check-in day
+     * @param checkOut the check-out day
+     * @return total price, or -1 if property not found
+     */
+    public double calculateBookingPriceGUI(String propertyName, int checkIn, int checkOut) {
+        Property prop = findProperty(propertyName);
+        if (prop == null) return -1;
+
+        Reservation tempReservation = new Reservation("TEMP", checkIn, checkOut);
+        tempReservation.calculateTotal(prop.getDates());
+        return tempReservation.getTotalPrice();
+    }
+
+    /**
+     * Processes a booking (GUI version).
+     * @param propertyName the property name
+     * @param guestName the guest name
+     * @param checkIn the check-in day
+     * @param checkOut the check-out day
+     * @return true if booking successful, false otherwise
+     */
+    public boolean processBookingGUI(String propertyName, String guestName, int checkIn, int checkOut) {
+        Property prop = findProperty(propertyName);
+        if (prop == null) return false;
+
+        if (!prop.areDatesAvailable(checkIn, checkOut)) {
+            return false;
+        }
+
+        Reservation reservation = new Reservation(guestName, checkIn, checkOut);
+        reservation.calculateTotal(prop.getDates());
+        prop.bookDates(checkIn, checkOut);
+        prop.addReservation(reservation);
+
+        return true;
+    }
+
+    // Console Methods
 
     /**
      * Handles the complete property creation process.
@@ -64,6 +219,7 @@ public class SystemManager {
             properties.add(newProp);
 
             System.out.println("[SUCCESS] Property '" + name + "' created successfully!");
+            System.out.println("Property Rate: PHP " + String.format("%.2f", newProp.getPropertyRate()) + " per night");
 
         } catch (Exception e) {
             System.out.println("[ERROR] Error creating property: " + e.getMessage());
@@ -156,16 +312,15 @@ public class SystemManager {
                 System.out.println("\n=== MANAGING: " + prop.getName() + " ===");
                 System.out.println("-----------------------------------");
                 System.out.println("1. Change Property Name");
-                System.out.println("2. Change Price per Night");
+                System.out.println("2. Change Base Price");
                 System.out.println("3. Change Property Type");
                 System.out.println("4. Add Date");
                 System.out.println("5. Remove Date");
-                System.out.println("6. Set Environmental Modifier");
-                System.out.println("7. Remove this Property");
-                System.out.println("8. Back to Main Menu");
+                System.out.println("6. Remove this Property");
+                System.out.println("7. Back to Main Menu");
                 System.out.print("Enter choice: ");
 
-                int choice = getValidatedInt(1, 8);
+                int choice = getValidatedInt(1, 7);
 
                 switch (choice) {
                     case 1:
@@ -183,7 +338,8 @@ public class SystemManager {
                         double newPrice = getValidatedDouble(100, 999999);
                         try {
                             prop.setBasePrice(newPrice);
-                            System.out.println("[SUCCESS] Base price updated.");
+                            System.out.println("[SUCCESS] Base price updated to PHP " + String.format("%.2f", newPrice));
+                            System.out.println("New property rate: PHP " + String.format("%.2f", prop.getPropertyRate()));
                         } catch (Exception e) {
                             System.out.println("[ERROR] " + e.getMessage());
                         }
@@ -194,6 +350,7 @@ public class SystemManager {
                         try {
                             prop.setPropertyType(newType);
                             System.out.println("[SUCCESS] Property type updated.");
+                            System.out.println("Property rate: PHP " + String.format("%.2f", prop.getPropertyRate()));
                         } catch (Exception e) {
                             System.out.println("[ERROR] " + e.getMessage());
                         }
@@ -223,18 +380,6 @@ public class SystemManager {
                         }
                         break;
                     case 6:
-                        System.out.print("Enter day number to modify (1-30): ");
-                        int dayToModify = getValidatedInt(1, 30);
-                        System.out.print("Enter new environmental modifier (0.8 - 1.2): ");
-                        double modifier = getValidatedDouble(0.8, 1.2);
-                        try {
-                            prop.setEnvironmentalModifier(dayToModify, modifier);
-                            System.out.println("[SUCCESS] Environmental modifier updated.");
-                        } catch (Exception e) {
-                            System.out.println("[ERROR] " + e.getMessage());
-                        }
-                        break;
-                    case 7:
                         try {
                             if (removeProperty(prop)) {
                                 System.out.println("[SUCCESS] Property removed successfully.");
@@ -244,7 +389,7 @@ public class SystemManager {
                             System.out.println("[ERROR] " + e.getMessage());
                         }
                         break;
-                    case 8:
+                    case 7:
                         continueManaging = false;
                         System.out.println("Returning to main menu...");
                         break;
@@ -299,6 +444,8 @@ public class SystemManager {
             // Display booking summary
             System.out.println("\n=== BOOKING SUMMARY ===");
             System.out.println("Property: " + prop.getName());
+            System.out.println("Property Type: " + prop.getPropertyType());
+            System.out.println("Property Rate: PHP " + String.format("%.2f", prop.getPropertyRate()));
             reservation.displayReservation();
 
             System.out.print("\nConfirm booking? (Y/N): ");
@@ -393,7 +540,8 @@ public class SystemManager {
         } else {
             for (int i = 0; i < properties.size(); i++) {
                 Property p = properties.get(i);
-                System.out.println("   " + (i + 1) + ". " + p.getName() + " (" + p.getPropertyType() + ")");
+                System.out.println("   " + (i + 1) + ". " + p.getName() + " (" + p.getPropertyType() +
+                        ") - Rate: PHP " + String.format("%.2f", p.getPropertyRate()));
             }
         }
     }

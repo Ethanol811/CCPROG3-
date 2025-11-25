@@ -5,9 +5,9 @@
  * This class serves as the base for all property types and provides common functionality
  * for managing dates, reservations, pricing, and environmental modifiers.
  *
- * MCO1 - Green Property Exchange
+ * MCO2 - Green Property Exchange
  * @author Group 23
- * @version 4.0
+ * @version 5.0
  */
 
 import java.util.ArrayList;
@@ -43,6 +43,14 @@ public abstract class Property {
      * @return the final rate for this property type
      */
     public abstract double calculateFinalRate(double basePrice);
+
+    /**
+     * Gets the property rate (base price × property type multiplier).
+     * @return the property rate per night
+     */
+    public double getPropertyRate() {
+        return calculateFinalRate(basePrice);
+    }
 
     // Getters and Setters
 
@@ -162,7 +170,7 @@ public abstract class Property {
         }
 
         date.setModifier(modifier);
-        date.updatePrice(calculateFinalRate(basePrice));
+        date.updatePrice(getPropertyRate());
     }
 
     // Date Management Methods
@@ -200,7 +208,7 @@ public abstract class Property {
             return;
         }
 
-        Date newDate = new Date(dayNumber, calculateFinalRate(basePrice), modifier);
+        Date newDate = new Date(dayNumber, getPropertyRate(), modifier);
         dates.add(newDate);
     }
 
@@ -387,11 +395,12 @@ public abstract class Property {
     }
 
     /**
-     * Updates all date prices based on the current base price.
+     * Updates all date prices based on the current base price and property multiplier.
      */
     private void updateAllDatePrices() {
+        double propertyRate = getPropertyRate();
         for (Date date : dates) {
-            date.updatePrice(calculateFinalRate(basePrice));
+            date.updatePrice(propertyRate);
         }
     }
 
@@ -406,7 +415,7 @@ public abstract class Property {
         System.out.println("Property Name: " + name);
         System.out.println("Property Type: " + propertyType);
         System.out.println("Base Price: PHP " + String.format("%.2f", basePrice) + " per night");
-        System.out.println("Property Rate: PHP " + String.format("%.2f", calculateFinalRate(basePrice)) + " per night");
+        System.out.println("Property Rate: PHP " + String.format("%.2f", getPropertyRate()) + " per night");
         System.out.println("Total Dates Listed: " + dates.size());
         System.out.println("Available Dates: " + getAvailableDateCount());
         System.out.println("Booked Dates: " + getBookedDateCount());
@@ -417,7 +426,7 @@ public abstract class Property {
     }
 
     /**
-     * Displays a calendar view of all dates.
+     * Displays a calendar view of all dates with proper weekday alignment.
      */
     public void displayCalendar() {
         System.out.println("\n+-----------------------------+");
@@ -426,21 +435,23 @@ public abstract class Property {
         System.out.println("| SUN MON TUE WED THU FRI SAT |");
         System.out.println("+-----------------------------+");
 
-        int firstDayOfWeek = 0; // 0 = Sunday
+        int startDayOfWeek = 0; // 0 = Sunday
+        int currentDay = 1;
 
-        for (int i = 0; i < firstDayOfWeek; i++) {
+        // Print leading spaces for the first week
+        for (int i = 0; i < startDayOfWeek; i++) {
             System.out.print("     ");
         }
 
         for (int day = 1; day <= 30; day++) {
             Date date = findDate(day);
-            String status = " ";
+            String status = "  "; // Default: 2 spaces for empty
 
             if (date != null) {
                 if (date.isBooked()) {
-                    status = "B";
+                    status = "B ";
                 } else {
-                    status = "A";
+                    status = "A ";
                 }
 
                 double modPct = date.getModifier() * 100;
@@ -451,13 +462,12 @@ public abstract class Property {
                 } else {
                     status += "Y";
                 }
-            } else {
-                status = "  ";
             }
 
             System.out.printf("%3s%s", day, status);
 
-            if ((day + firstDayOfWeek) % 7 == 0) {
+            // Move to next line after Saturday
+            if ((day + startDayOfWeek) % 7 == 0) {
                 System.out.println();
             }
         }
@@ -480,7 +490,7 @@ public abstract class Property {
 
         System.out.println("\n=== DATE DETAILS ===");
         System.out.println("Day Number: " + dayNumber);
-        System.out.println("Base Price: PHP " + String.format("%.2f", date.getBasePrice()));
+        System.out.println("Property Rate: PHP " + String.format("%.2f", date.getBasePrice()));
         System.out.println("Final Price: PHP " + String.format("%.2f", date.getFinalPrice()));
         System.out.println("Modifier: " + String.format("%.2f", date.getModifier()));
         System.out.println("Status: " + (date.isBooked() ? "BOOKED" : "AVAILABLE"));
@@ -526,6 +536,7 @@ public abstract class Property {
     @Override
     public String toString() {
         return "Property{name='" + name + "', type='" + propertyType + "', basePrice=" + basePrice +
+                ", propertyRate=" + String.format("%.2f", getPropertyRate()) +
                 ", dates=" + dates.size() + ", reservations=" + reservations.size() + "}";
     }
 }
