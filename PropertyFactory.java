@@ -1,4 +1,3 @@
-// PropertyFactory.java
 /**
  * PropertyFactory.java
  *

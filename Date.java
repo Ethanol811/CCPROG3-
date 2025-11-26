@@ -1,4 +1,3 @@
-// Date.java
 /**
  * Date.java
  *

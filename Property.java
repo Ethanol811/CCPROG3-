@@ -1,11 +1,9 @@
-// Property.java
 /**
  * Property.java
  *
  * Represents an abstract property listing in the Green Property Exchange system.
  * This class serves as the base for all property types and provides common functionality
  * for managing dates, reservations, pricing, and environmental modifiers.
- * Follows Open/Closed Principle - open for extension, closed for modification.
  *
  * MCO2 - Green Property Exchange
  * @author Group 23
@@ -74,7 +72,7 @@ public abstract class Property {
         return calculateFinalRate(basePrice);
     }
 
-    // Getters and Setters following Interface Segregation Principle
+    // Getters and Setters
 
     /**
      * Returns the property name.

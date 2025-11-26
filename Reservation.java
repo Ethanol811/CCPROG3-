@@ -1,4 +1,3 @@
-// Reservation.java
 /**
  * Reservation.java
  *
@@ -8,7 +7,6 @@
  *  - Check-in and check-out dates
  *  - Total price
  *  - Nightly price breakdown
- * Follows Single Responsibility Principle - only handles reservation data and calculations.
  *
  * MCO1 - Green Property Exchange
  * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
@@ -41,7 +39,7 @@ public class Reservation {
     }
 
     // -------------------------------------------------------
-    // Getters following Interface Segregation Principle
+    // Getters
     // -------------------------------------------------------
 
     /**
@@ -80,7 +78,7 @@ public class Reservation {
     }
 
     // -------------------------------------------------------
-    // Core Methods following Single Responsibility Principle
+    // Core Methods
     // -------------------------------------------------------
 
     /**

@@ -1,10 +1,7 @@
-// EnvironmentalImpact.java
 /**
  * EnvironmentalImpact.java
  *
  * Represents an environmental impact event with name and modifier.
- * Follows Single Responsibility Principle by handling only impact data.
- * Immutable design pattern for thread safety and data integrity.
  *
  * MCO2 - Green Property Exchange
  * @author Group 23

@@ -1,4 +1,3 @@
-// EnvironmentalImpactManager.java
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,8 +6,6 @@ import java.util.Map;
  *
  * Manages environmental impact events for specific dates in a month.
  * Provides preset environmental impacts and allows custom impact management.
- * Follows Open/Closed Principle - open for extension, closed for modification.
- * Follows Single Responsibility Principle - only manages environmental impacts.
  *
  * MCO2 - Green Property Exchange
  * @author Group 23

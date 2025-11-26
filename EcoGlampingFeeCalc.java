@@ -7,9 +7,6 @@
  * This class calculates the final rate for eco-glamping properties by applying
  * a 50% markup to the base price (1.5 multiplier).
  *
- * Eco-glamping properties typically command premium pricing due to their
- * unique outdoor experience and sustainable amenities.
- *
  * MC02 - Green Property Exchange
  * @author Group 23 - John Ethan Chiuten, Julian Nicos Reyes
  * @version 2.0

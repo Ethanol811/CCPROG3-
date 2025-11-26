@@ -1,9 +1,7 @@
-// PropertyType.java
 /**
  * PropertyType.java
  *
  * Interface defining the contract for property type rate calculations.
- * Follows Strategy Pattern and Open/Closed Principle - new property types can be added without modifying existing code.
  *
  * MCO2 - Green Property Exchange
  * @author Group 23

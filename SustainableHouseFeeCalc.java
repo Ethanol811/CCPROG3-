@@ -1,4 +1,3 @@
-// SustainableHouseFeeCalc.java
 /**
  * SustainableHouseFeeCalc.java
  *

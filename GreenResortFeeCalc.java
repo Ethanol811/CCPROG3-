@@ -1,4 +1,3 @@
-// GreenResortFeeCalc.java
 /**
  * GreenResortFeeCalc.java
  *

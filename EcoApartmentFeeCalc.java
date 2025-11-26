@@ -1,4 +1,3 @@
-// EcoApartmentFeeCalc.java
 /**
  * EcoApartmentFeeCalc.java
  *

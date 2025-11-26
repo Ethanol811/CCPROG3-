@@ -1,11 +1,8 @@
-// SystemManager.java
 /**
  * SystemManager.java
  *
  * Main controller class for the Green Property Exchange system.
  * Updated for MCO2 with GUI support, proper price calculations, and environmental impact management.
- * Follows Single Responsibility Principle - manages the system and coordinates between components.
- * Follows Dependency Inversion Principle - depends on abstractions (Property) not concrete implementations.
  *
  * MCO2 - Green Property Exchange
  * @author Group 23 - John Ethan Chiuten, Julian Nicos Reyes
@@ -40,7 +37,7 @@ public class SystemManager {
         this.propertyFactory = new PropertyFactory();
     }
 
-    // GUI Helper Methods following Interface Segregation Principle
+    // GUI Helper Methods
 
     /**
      * Gets all properties in the system for GUI display.
