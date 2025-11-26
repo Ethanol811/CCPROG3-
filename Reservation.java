@@ -1,3 +1,4 @@
+// Reservation.java
 /**
  * Reservation.java
  *
@@ -7,18 +8,21 @@
  *  - Check-in and check-out dates
  *  - Total price
  *  - Nightly price breakdown
+ * Follows Single Responsibility Principle - only handles reservation data and calculations.
  *
  * MCO1 - Green Property Exchange
  * @author Group 23 - John Ethan Chiuten ,Julian Nicos Reyes
- * @version 1.3
+ * @version 2.0
  */
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Reservation {
-    private String guestName;
-    private int checkIn;      // inclusive
-    private int checkOut;     // exclusive
+    private final String guestName;
+    private final int checkIn;      // inclusive
+    private final int checkOut;     // exclusive
     private double totalPrice;
     private ArrayList<Double> breakdown; // nightly price list
 
@@ -37,7 +41,7 @@ public class Reservation {
     }
 
     // -------------------------------------------------------
-    // Getters
+    // Getters following Interface Segregation Principle
     // -------------------------------------------------------
 
     /**
@@ -69,21 +73,21 @@ public class Reservation {
     }
 
     /**
-     * @return List of nightly prices
+     * @return Unmodifiable list of nightly prices
      */
-    public ArrayList<Double> getBreakdown() {
-        return breakdown;
+    public List<Double> getBreakdown() {
+        return Collections.unmodifiableList(breakdown);
     }
 
     // -------------------------------------------------------
-    // Core Methods
+    // Core Methods following Single Responsibility Principle
     // -------------------------------------------------------
 
     /**
      * Calculates total price based on nightly rate from property's available dates.
      * @param dates The list of all property dates
      */
-    public void calculateTotal(ArrayList<Date> dates) {
+    public void calculateTotal(List<Date> dates) {
         totalPrice = 0;
         breakdown.clear();
 
@@ -115,5 +119,23 @@ public class Reservation {
             System.out.printf("   Day %2d: PHP %8.2f%n", (checkIn + i), breakdown.get(i));
         }
         System.out.println("-----------------------------------");
+    }
+    
+    /**
+     * Returns the number of nights in this reservation.
+     * @return number of nights
+     */
+    public int getNumberOfNights() {
+        return checkOut - checkIn;
+    }
+    
+    /**
+     * Returns a string representation of the reservation.
+     * @return string representation
+     */
+    @Override
+    public String toString() {
+        return "Reservation{guest='" + guestName + "', checkIn=" + checkIn + 
+               ", checkOut=" + checkOut + ", total=" + totalPrice + "}";
     }
 }

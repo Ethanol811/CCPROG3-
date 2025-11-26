@@ -1,7 +1,9 @@
+// SustainableHouseFeeCalc.java
 /**
  * SustainableHouseFeeCalc.java
  *
  * Represents a sustainable house property type in the Green Property Exchange system.
+ * Implements PropertyType interface following Strategy Pattern.
  * This class calculates the final rate for sustainable house properties by applying
  * a 20% markup to the base price (1.2 multiplier).
  *
@@ -10,10 +12,10 @@
  *
  * MC02 - Green Property Exchange
  * @author Group 23 - John Ethan Chiuten, Julian Nicos Reyes
- * @version 1.0
+ * @version 2.0
  */
 
-public class SustainableHouseFeeCalc extends Property {
+public class SustainableHouseFeeCalc extends Property implements PropertyType {
 
     /**
      * Constructs a new SustainableHouseFeeCalc instance with the specified name.
@@ -36,6 +38,27 @@ public class SustainableHouseFeeCalc extends Property {
      */
     @Override
     public double calculateFinalRate(double basePrice){
+        return calculateRate(basePrice);
+    }
+    
+    /**
+     * Calculates the rate for sustainable house property type.
+     * Implements PropertyType interface following Strategy Pattern.
+     *
+     * @param basePrice the base price of the property per night
+     * @return the final rate calculated as basePrice * 1.2
+     */
+    @Override
+    public double calculateRate(double basePrice) {
         return basePrice * 1.20;
+    }
+    
+    /**
+     * Returns the display name of the property type.
+     * @return the property type name
+     */
+    @Override
+    public String getTypeName() {
+        return "Sustainable House";
     }
 }

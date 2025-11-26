@@ -1,13 +1,15 @@
+// Property.java
 /**
  * Property.java
  *
  * Represents an abstract property listing in the Green Property Exchange system.
  * This class serves as the base for all property types and provides common functionality
  * for managing dates, reservations, pricing, and environmental modifiers.
+ * Follows Open/Closed Principle - open for extension, closed for modification.
  *
  * MCO2 - Green Property Exchange
  * @author Group 23
- * @version 5.0
+ * @version 5.1
  */
 
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ public abstract class Property {
     private ArrayList<Date> dates;
     private ArrayList<Reservation> reservations;
     private String propertyType;
+    private EnvironmentalImpactManager environmentalImpactManager;
 
     /**
      * Constructs a new Property with the specified name.
@@ -35,10 +38,29 @@ public abstract class Property {
         this.dates = new ArrayList<Date>();
         this.reservations = new ArrayList<Reservation>();
         this.propertyType = "";
+        this.environmentalImpactManager = new EnvironmentalImpactManager();
+        
+        // Initialize with all 30 dates
+        initializeAllDates();
+    }
+
+
+
+    /**
+    * Initializes the property with all 30 dates by default.
+    * Follows Single Responsibility Principle - only handles date initialization.
+    */
+    private void initializeAllDates() {
+        for (int day = 1; day <= 30; day++) {
+            // Create date directly without using addDate method to avoid validation conflicts
+            Date newDate = new Date(day, getPropertyRate(), new EnvironmentalImpact("Standard", 1.0));
+            dates.add(newDate);
+        }
     }
 
     /**
      * Calculates the final rate for this property type based on the base price.
+     * This is the template method that follows Template Method Pattern.
      * @param basePrice the base price to calculate from
      * @return the final rate for this property type
      */
@@ -52,7 +74,7 @@ public abstract class Property {
         return calculateFinalRate(basePrice);
     }
 
-    // Getters and Setters
+    // Getters and Setters following Interface Segregation Principle
 
     /**
      * Returns the property name.
@@ -67,19 +89,32 @@ public abstract class Property {
      * @param newName the new name for the property
      */
     public void setName(String newName) {
-        if (newName == null || newName.trim().isEmpty()) {
-            System.out.println("[ERROR] Property name cannot be null or empty");
-            return;
-        }
-        if (newName.trim().length() < 2) {
-            System.out.println("[ERROR] Property name must be at least 2 characters long");
-            return;
-        }
-        if (!reservations.isEmpty()) {
-            System.out.println("[ERROR] Cannot modify property with active reservations");
+        if (!validateName(newName)) {
             return;
         }
         this.name = newName.trim();
+    }
+
+    /**
+     * Validates property name according to business rules.
+     * Follows Single Responsibility Principle - validation logic separated.
+     * @param name the name to validate
+     * @return true if valid, false otherwise
+     */
+    private boolean validateName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            System.out.println("[ERROR] Property name cannot be null or empty");
+            return false;
+        }
+        if (name.trim().length() < 2) {
+            System.out.println("[ERROR] Property name must be at least 2 characters long");
+            return false;
+        }
+        if (!reservations.isEmpty()) {
+            System.out.println("[ERROR] Cannot modify property with active reservations");
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -95,17 +130,30 @@ public abstract class Property {
      * @param newPrice the new base price
      */
     public void setBasePrice(double newPrice) {
-        if (newPrice < MIN_BASE_PRICE || newPrice > MAX_BASE_PRICE) {
-            System.out.println("[ERROR] Price must be between PHP " + MIN_BASE_PRICE + " and PHP " + MAX_BASE_PRICE);
-            return;
-        }
-        if (!reservations.isEmpty()) {
-            System.out.println("[ERROR] Cannot modify property with active reservations");
+        if (!validatePrice(newPrice)) {
             return;
         }
 
         this.basePrice = newPrice;
         updateAllDatePrices();
+    }
+
+    /**
+     * Validates price according to business rules.
+     * Follows Single Responsibility Principle - validation logic separated.
+     * @param price the price to validate
+     * @return true if valid, false otherwise
+     */
+    private boolean validatePrice(double price) {
+        if (price < MIN_BASE_PRICE || price > MAX_BASE_PRICE) {
+            System.out.println("[ERROR] Price must be between PHP " + MIN_BASE_PRICE + " and PHP " + MAX_BASE_PRICE);
+            return false;
+        }
+        if (!reservations.isEmpty()) {
+            System.out.println("[ERROR] Cannot modify property with active reservations");
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -121,15 +169,28 @@ public abstract class Property {
      * @param newType the new property type
      */
     public void setPropertyType(String newType) {
-        if (newType == null || newType.trim().isEmpty()) {
-            System.out.println("[ERROR] Property type cannot be null or empty");
-            return;
-        }
-        if (!reservations.isEmpty()) {
-            System.out.println("[ERROR] Cannot modify property with active reservations");
+        if (!validatePropertyType(newType)) {
             return;
         }
         this.propertyType = newType.trim();
+    }
+
+    /**
+     * Validates property type according to business rules.
+     * Follows Single Responsibility Principle - validation logic separated.
+     * @param type the property type to validate
+     * @return true if valid, false otherwise
+     */
+    private boolean validatePropertyType(String type) {
+        if (type == null || type.trim().isEmpty()) {
+            System.out.println("[ERROR] Property type cannot be null or empty");
+            return false;
+        }
+        if (!reservations.isEmpty()) {
+            System.out.println("[ERROR] Cannot modify property with active reservations");
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -137,7 +198,7 @@ public abstract class Property {
      * @return list of dates
      */
     public ArrayList<Date> getDates() {
-        return dates;
+        return new ArrayList<>(dates); // Return copy for encapsulation
     }
 
     /**
@@ -145,21 +206,25 @@ public abstract class Property {
      * @return list of reservations
      */
     public ArrayList<Reservation> getReservations() {
-        return reservations;
+        return new ArrayList<>(reservations); // Return copy for encapsulation
     }
 
     /**
-     * Sets the environmental modifier for a specific date.
+     * Returns the environmental impact manager for this property.
+     * @return the environmental impact manager
+     */
+    public EnvironmentalImpactManager getEnvironmentalImpactManager() {
+        return environmentalImpactManager;
+    }
+
+    /**
+     * Sets the environmental modifier and name for a specific date.
      * @param dayNumber the day number to modify
      * @param modifier the new environmental modifier
+     * @param impactName the name of the environmental impact
      */
-    public void setEnvironmentalModifier(int dayNumber, double modifier) {
-        if (dayNumber < 1 || dayNumber > MAX_DATES) {
-            System.out.println("[ERROR] Day number must be between 1 and " + MAX_DATES);
-            return;
-        }
-        if (modifier < MIN_MODIFIER || modifier > MAX_MODIFIER) {
-            System.out.println("[ERROR] Modifier must be between " + MIN_MODIFIER + " and " + MAX_MODIFIER);
+    public void setEnvironmentalModifier(int dayNumber, double modifier, String impactName) {
+        if (!validateDateModification(dayNumber, modifier)) {
             return;
         }
 
@@ -169,11 +234,41 @@ public abstract class Property {
             return;
         }
 
-        date.setModifier(modifier);
+        EnvironmentalImpact impact = new EnvironmentalImpact(impactName, modifier);
+        date.setEnvironmentalImpact(impact);
         date.updatePrice(getPropertyRate());
     }
 
-    // Date Management Methods
+    /**
+     * Validates date modification parameters.
+     * Follows Single Responsibility Principle - validation logic separated.
+     * @param dayNumber the day number to validate
+     * @param modifier the modifier to validate
+     * @return true if valid, false otherwise
+     */
+    private boolean validateDateModification(int dayNumber, double modifier) {
+        if (dayNumber < 1 || dayNumber > MAX_DATES) {
+            System.out.println("[ERROR] Day number must be between 1 and " + MAX_DATES);
+            return false;
+        }
+        if (modifier < MIN_MODIFIER || modifier > MAX_MODIFIER) {
+            System.out.println("[ERROR] Modifier must be between " + MIN_MODIFIER + " and " + MAX_MODIFIER);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Sets the environmental modifier for a specific date with default name.
+     * Method overloading for convenience.
+     * @param dayNumber the day number to modify
+     * @param modifier the new environmental modifier
+     */
+    public void setEnvironmentalModifier(int dayNumber, double modifier) {
+        setEnvironmentalModifier(dayNumber, modifier, "Custom Impact");
+    }
+
+    // Date Management Methods following Single Responsibility Principle
 
     /**
      * Adds a new date to the property with default modifier.
@@ -189,27 +284,37 @@ public abstract class Property {
      * @param modifier the environmental modifier
      */
     public void addDate(int dayNumber, double modifier) {
+        if (!validateDateAddition(dayNumber, modifier)) {
+            return;
+        }
+
+        Date newDate = new Date(dayNumber, getPropertyRate(), new EnvironmentalImpact("Standard", modifier));
+        dates.add(newDate);
+    }
+
+
+
+    /**
+     * Validates date addition parameters.
+     * Follows Single Responsibility Principle - validation logic separated.
+     * @param dayNumber the day number to validate
+     * @param modifier the modifier to validate
+     * @return true if valid, false otherwise
+     */
+    private boolean validateDateAddition(int dayNumber, double modifier) {
         if (dayNumber < 1 || dayNumber > MAX_DATES) {
             System.out.println("[ERROR] Day number must be between 1 and " + MAX_DATES);
-            return;
+            return false;
         }
         if (modifier < MIN_MODIFIER || modifier > MAX_MODIFIER) {
             System.out.println("[ERROR] Modifier must be between " + MIN_MODIFIER + " and " + MAX_MODIFIER);
-            return;
+            return false;
         }
-
         if (dates.size() >= MAX_DATES) {
             System.out.println("[ERROR] Cannot add more than " + MAX_DATES + " dates");
-            return;
+            return false;
         }
-
-        if (findDate(dayNumber) != null) {
-            System.out.println("[ERROR] Day " + dayNumber + " already exists in property");
-            return;
-        }
-
-        Date newDate = new Date(dayNumber, getPropertyRate(), modifier);
-        dates.add(newDate);
+        return true;
     }
 
     /**
@@ -217,24 +322,39 @@ public abstract class Property {
      * @param dayNumber the day number to remove
      */
     public void removeDate(int dayNumber) {
-        if (dayNumber < 1 || dayNumber > MAX_DATES) {
-            System.out.println("[ERROR] Day number must be between 1 and " + MAX_DATES);
+        if (!validateDateRemoval(dayNumber)) {
             return;
         }
 
         for (int i = 0; i < dates.size(); i++) {
             Date date = dates.get(i);
             if (date.getDayNumber() == dayNumber) {
-                if (date.isBooked()) {
-                    System.out.println("[ERROR] Cannot remove booked date: " + dayNumber);
-                    return;
-                }
                 dates.remove(i);
                 System.out.println("[SUCCESS] Date removed successfully");
                 return;
             }
         }
         System.out.println("[ERROR] Day " + dayNumber + " not found in property");
+    }
+
+    /**
+     * Validates date removal parameters.
+     * Follows Single Responsibility Principle - validation logic separated.
+     * @param dayNumber the day number to validate
+     * @return true if valid, false otherwise
+     */
+    private boolean validateDateRemoval(int dayNumber) {
+        if (dayNumber < 1 || dayNumber > MAX_DATES) {
+            System.out.println("[ERROR] Day number must be between 1 and " + MAX_DATES);
+            return false;
+        }
+
+        Date date = findDate(dayNumber);
+        if (date != null && date.isBooked()) {
+            System.out.println("[ERROR] Cannot remove booked date: " + dayNumber);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -343,7 +463,7 @@ public abstract class Property {
         reservation.calculateTotal(dates);
     }
 
-    // Calculation Methods
+    // Calculation Methods following Single Responsibility Principle
 
     /**
      * Calculates total earnings from all reservations.
@@ -404,7 +524,7 @@ public abstract class Property {
         }
     }
 
-    // Display Methods
+    // Display Methods following Interface Segregation Principle
 
     /**
      * Displays comprehensive information about the property.
@@ -492,7 +612,8 @@ public abstract class Property {
         System.out.println("Day Number: " + dayNumber);
         System.out.println("Property Rate: PHP " + String.format("%.2f", date.getBasePrice()));
         System.out.println("Final Price: PHP " + String.format("%.2f", date.getFinalPrice()));
-        System.out.println("Modifier: " + String.format("%.2f", date.getModifier()));
+        System.out.println("Environmental Impact: " + date.getEnvironmentalImpactName());
+        System.out.println("Modifier: " + String.format("%.0f", date.getModifier() * 100) + "%");
         System.out.println("Status: " + (date.isBooked() ? "BOOKED" : "AVAILABLE"));
 
         for (Reservation reservation : reservations) {

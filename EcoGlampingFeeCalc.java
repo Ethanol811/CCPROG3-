@@ -1,7 +1,9 @@
+// EcoGlampingFeeCalc.java
 /**
  * EcoGlampingFeeCalc.java
  *
  * Represents an eco-glamping property type in the Green Property Exchange system.
+ * Implements PropertyType interface following Strategy Pattern.
  * This class calculates the final rate for eco-glamping properties by applying
  * a 50% markup to the base price (1.5 multiplier).
  *
@@ -10,10 +12,10 @@
  *
  * MC02 - Green Property Exchange
  * @author Group 23 - John Ethan Chiuten, Julian Nicos Reyes
- * @version 1.0
+ * @version 2.0
  */
 
-public class EcoGlampingFeeCalc extends Property {
+public class EcoGlampingFeeCalc extends Property implements PropertyType {
 
     /**
      * Constructs a new EcoGlampingFeeCalc instance with the specified name.
@@ -36,6 +38,27 @@ public class EcoGlampingFeeCalc extends Property {
      */
     @Override
     public double calculateFinalRate(double basePrice){
+        return calculateRate(basePrice);
+    }
+    
+    /**
+     * Calculates the rate for eco-glamping property type.
+     * Implements PropertyType interface following Strategy Pattern.
+     *
+     * @param basePrice the base price of the property per night
+     * @return the final rate calculated as basePrice * 1.5
+     */
+    @Override
+    public double calculateRate(double basePrice) {
         return basePrice * 1.50;
+    }
+    
+    /**
+     * Returns the display name of the property type.
+     * @return the property type name
+     */
+    @Override
+    public String getTypeName() {
+        return "Eco-Glamping";
     }
 }

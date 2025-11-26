@@ -21,6 +21,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainFrame extends JFrame {
     private CardLayout cardLayout;
@@ -531,217 +532,217 @@ public class MainFrame extends JFrame {
      *
      * @return JPanel containing the booking simulation interface
      */
-    private JPanel createSimulateBookingPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
+private JPanel createSimulateBookingPanel() {
+    JPanel panel = new JPanel(new BorderLayout());
+    panel.setBackground(Color.WHITE);
 
-        // Back button
-        JButton backButton = new JButton("← Back to Main Menu");
-        backButton.addActionListener(e -> cardLayout.show(mainPanel, MAIN_MENU));
+    // Back button
+    JButton backButton = new JButton("← Back to Main Menu");
+    backButton.addActionListener(e -> cardLayout.show(mainPanel, MAIN_MENU));
 
-        // Header
-        JLabel headerLabel = new JLabel("Simulate Booking", JLabel.CENTER);
-        headerLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        headerLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+    // Header
+    JLabel headerLabel = new JLabel("Simulate Booking", JLabel.CENTER);
+    headerLabel.setFont(new Font("Arial", Font.BOLD, 24));
+    headerLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
 
-        // Main content panel
-        JPanel contentPanel = new JPanel(new GridBagLayout());
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
-        contentPanel.setBackground(Color.WHITE);
+    // Main content panel
+    JPanel contentPanel = new JPanel(new GridBagLayout());
+    contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
+    contentPanel.setBackground(Color.WHITE);
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 5, 5, 5);
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.insets = new Insets(5, 5, 5, 5);
 
-        // Property selection
-        gbc.gridx = 0; gbc.gridy = 0;
-        contentPanel.add(new JLabel("Select Property:"), gbc);
-        gbc.gridx = 1;
-        JComboBox<String> propertyComboBox = new JComboBox<>();
-        JButton refreshButton = new JButton("Refresh");
-        JPanel propertyPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        propertyPanel.add(propertyComboBox);
-        propertyPanel.add(refreshButton);
-        contentPanel.add(propertyPanel, gbc);
+    // Property selection
+    gbc.gridx = 0; gbc.gridy = 0;
+    contentPanel.add(new JLabel("Select Property:"), gbc);
+    gbc.gridx = 1;
+    JComboBox<String> propertyComboBox = new JComboBox<>();
+    JButton refreshButton = new JButton("Refresh");
+    JPanel propertyPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    propertyPanel.add(propertyComboBox);
+    propertyPanel.add(refreshButton);
+    contentPanel.add(propertyPanel, gbc);
 
-        // Guest information
-        gbc.gridx = 0; gbc.gridy = 1;
-        contentPanel.add(new JLabel("Guest Name:"), gbc);
-        gbc.gridx = 1;
-        JTextField guestNameField = new JTextField(20);
-        contentPanel.add(guestNameField, gbc);
+    // Guest information
+    gbc.gridx = 0; gbc.gridy = 1;
+    contentPanel.add(new JLabel("Guest Name:"), gbc);
+    gbc.gridx = 1;
+    JTextField guestNameField = new JTextField(20);
+    contentPanel.add(guestNameField, gbc);
 
-        // Check-in date
-        gbc.gridx = 0; gbc.gridy = 2;
-        contentPanel.add(new JLabel("Check-in Day (1-29):"), gbc);
-        gbc.gridx = 1;
-        JTextField checkInField = new JTextField(5);
-        contentPanel.add(checkInField, gbc);
+    // Check-in date
+    gbc.gridx = 0; gbc.gridy = 2;
+    contentPanel.add(new JLabel("Check-in Day (1-29):"), gbc);
+    gbc.gridx = 1;
+    JTextField checkInField = new JTextField(5);
+    contentPanel.add(checkInField, gbc);
 
-        // Check-out date
-        gbc.gridx = 0; gbc.gridy = 3;
-        contentPanel.add(new JLabel("Check-out Day (2-30):"), gbc);
-        gbc.gridx = 1;
-        JTextField checkOutField = new JTextField(5);
-        contentPanel.add(checkOutField, gbc);
+    // Check-out date
+    gbc.gridx = 0; gbc.gridy = 3;
+    contentPanel.add(new JLabel("Check-out Day (2-30):"), gbc);
+    gbc.gridx = 1;
+    JTextField checkOutField = new JTextField(5);
+    contentPanel.add(checkOutField, gbc);
 
-        // Booking summary
-        gbc.gridx = 0; gbc.gridy = 4;
-        gbc.gridwidth = 2;
-        JTextArea summaryArea = new JTextArea(10, 40);
-        summaryArea.setEditable(false);
-        summaryArea.setBorder(BorderFactory.createTitledBorder("Booking Summary"));
-        summaryArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-        JScrollPane summaryScroll = new JScrollPane(summaryArea);
-        contentPanel.add(summaryScroll, gbc);
+    // Booking summary
+    gbc.gridx = 0; gbc.gridy = 4;
+    gbc.gridwidth = 2;
+    JTextArea summaryArea = new JTextArea(10, 40);
+    summaryArea.setEditable(false);
+    summaryArea.setBorder(BorderFactory.createTitledBorder("Booking Summary"));
+    summaryArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+    JScrollPane summaryScroll = new JScrollPane(summaryArea);
+    contentPanel.add(summaryScroll, gbc);
 
-        // Buttons
-        gbc.gridx = 0; gbc.gridy = 5;
-        gbc.gridwidth = 2;
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        JButton checkAvailabilityButton = new JButton("Check Availability");
-        JButton calculatePriceButton = new JButton("Calculate Price");
-        JButton confirmBookingButton = new JButton("Confirm Booking");
-        confirmBookingButton.setBackground(new Color(144, 238, 144));
+    // Buttons
+    gbc.gridx = 0; gbc.gridy = 5;
+    gbc.gridwidth = 2;
+    JPanel buttonPanel = new JPanel(new FlowLayout());
+    JButton checkAvailabilityButton = new JButton("Check Availability");
+    JButton calculatePriceButton = new JButton("Calculate Price");
+    JButton confirmBookingButton = new JButton("Confirm Booking");
+    confirmBookingButton.setBackground(new Color(144, 238, 144));
 
-        buttonPanel.add(checkAvailabilityButton);
-        buttonPanel.add(calculatePriceButton);
-        buttonPanel.add(confirmBookingButton);
-        contentPanel.add(buttonPanel, gbc);
+    buttonPanel.add(checkAvailabilityButton);
+    buttonPanel.add(calculatePriceButton);
+    buttonPanel.add(confirmBookingButton);
+    contentPanel.add(buttonPanel, gbc);
 
-        // Action listeners
-        refreshButton.addActionListener(e -> refreshPropertyComboBox(propertyComboBox));
+    // Action listeners
+    refreshButton.addActionListener(e -> refreshPropertyComboBox(propertyComboBox));
 
-        checkAvailabilityButton.addActionListener(e -> {
-            String selectedName = (String) propertyComboBox.getSelectedItem();
-            if (selectedName != null && manager != null) {
-                Property prop = manager.findProperty(selectedName);
-                if (prop != null) {
-                    try {
-                        int checkIn = Integer.parseInt(checkInField.getText().trim());
-                        int checkOut = Integer.parseInt(checkOutField.getText().trim());
-
-                        if (prop.areDatesAvailable(checkIn, checkOut)) {
-                            summaryArea.setText("✓ Dates are AVAILABLE for booking!\n\n");
-                            summaryArea.append("Property: " + prop.getName() + "\n");
-                            summaryArea.append("Check-in: Day " + checkIn + "\n");
-                            summaryArea.append("Check-out: Day " + checkOut + "\n");
-                            summaryArea.append("Total Nights: " + (checkOut - checkIn) + "\n");
-                        } else {
-                            summaryArea.setText("✗ Dates are NOT AVAILABLE for booking.\n\n");
-                            ArrayList<Integer> unavailable = prop.getUnavailableDays(checkIn, checkOut);
-                            summaryArea.append("Unavailable days: " + unavailable + "\n");
-                        }
-                    } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(this, "Please enter valid check-in and check-out days!", "Error", JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-            }
-        });
-
-        calculatePriceButton.addActionListener(e -> {
-            String selectedName = (String) propertyComboBox.getSelectedItem();
-            if (selectedName != null && manager != null) {
-                Property prop = manager.findProperty(selectedName);
-                if (prop != null) {
-                    try {
-                        int checkIn = Integer.parseInt(checkInField.getText().trim());
-                        int checkOut = Integer.parseInt(checkOutField.getText().trim());
-
-                        // Create temporary reservation to calculate price
-                        Reservation tempReservation = new Reservation("TEMP", checkIn, checkOut);
-                        tempReservation.calculateTotal(prop.getDates());
-
-                        summaryArea.setText("=== PRICE CALCULATION ===\n\n");
-                        summaryArea.append("Property: " + prop.getName() + "\n");
-                        summaryArea.append("Property Type: " + prop.getPropertyType() + "\n");
-                        summaryArea.append("Property Rate: PHP " + String.format("%.2f", prop.getPropertyRate()) + " per night\n");
-                        summaryArea.append("Check-in: Day " + checkIn + "\n");
-                        summaryArea.append("Check-out: Day " + checkOut + "\n");
-                        summaryArea.append("Total Nights: " + (checkOut - checkIn) + "\n");
-                        summaryArea.append("Total Price: PHP " + String.format("%.2f", tempReservation.getTotalPrice()) + "\n\n");
-
-                        summaryArea.append("PRICE BREAKDOWN:\n");
-                        ArrayList<Double> breakdown = tempReservation.getBreakdown();
-                        for (int i = 0; i < breakdown.size(); i++) {
-                            int day = checkIn + i;
-                            Date date = prop.findDate(day);
-                            double modifier = date != null ? date.getModifier() : 1.0;
-                            summaryArea.append(String.format("  Day %2d: PHP %8.2f (Modifier: %.0f%%)%n",
-                                    day, breakdown.get(i), modifier * 100));
-                        }
-                    } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(this, "Please enter valid check-in and check-out days!", "Error", JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-            }
-        });
-
-        confirmBookingButton.addActionListener(e -> {
-            String selectedName = (String) propertyComboBox.getSelectedItem();
-            String guestName = guestNameField.getText().trim();
-
-            if (selectedName == null || guestName.isEmpty() || manager == null) {
-                JOptionPane.showMessageDialog(this, "Please select a property and enter guest name!", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
+    checkAvailabilityButton.addActionListener(e -> {
+        String selectedName = (String) propertyComboBox.getSelectedItem();
+        if (selectedName != null && manager != null) {
             Property prop = manager.findProperty(selectedName);
             if (prop != null) {
                 try {
                     int checkIn = Integer.parseInt(checkInField.getText().trim());
                     int checkOut = Integer.parseInt(checkOutField.getText().trim());
 
-                    if (!prop.areDatesAvailable(checkIn, checkOut)) {
-                        JOptionPane.showMessageDialog(this, "Selected dates are not available!", "Error", JOptionPane.ERROR_MESSAGE);
-                        return;
+                    if (prop.areDatesAvailable(checkIn, checkOut)) {
+                        summaryArea.setText("✓ Dates are AVAILABLE for booking!\n\n");
+                        summaryArea.append("Property: " + prop.getName() + "\n");
+                        summaryArea.append("Check-in: Day " + checkIn + "\n");
+                        summaryArea.append("Check-out: Day " + checkOut + "\n");
+                        summaryArea.append("Total Nights: " + (checkOut - checkIn) + "\n");
+                    } else {
+                        summaryArea.setText("✗ Dates are NOT AVAILABLE for booking.\n\n");
+                        ArrayList<Integer> unavailable = prop.getUnavailableDays(checkIn, checkOut);
+                        summaryArea.append("Unavailable days: " + unavailable + "\n");
                     }
-
-                    // Create and confirm reservation
-                    Reservation reservation = new Reservation(guestName, checkIn, checkOut);
-                    reservation.calculateTotal(prop.getDates());
-
-                    int confirm = JOptionPane.showConfirmDialog(this,
-                            "Confirm booking for " + guestName + "?\n" +
-                                    "Property: " + prop.getName() + "\n" +
-                                    "Dates: Day " + checkIn + " to Day " + checkOut + "\n" +
-                                    "Total Price: PHP " + String.format("%.2f", reservation.getTotalPrice()),
-                            "Confirm Booking", JOptionPane.YES_NO_OPTION);
-
-                    if (confirm == JOptionPane.YES_OPTION) {
-                        prop.bookDates(checkIn, checkOut);
-                        prop.addReservation(reservation);
-
-                        JOptionPane.showMessageDialog(this,
-                                "Booking confirmed successfully!\n\n" +
-                                        "Guest: " + guestName + "\n" +
-                                        "Property: " + prop.getName() + "\n" +
-                                        "Dates: Day " + checkIn + " to Day " + checkOut + "\n" +
-                                        "Total: PHP " + String.format("%.2f", reservation.getTotalPrice()),
-                                "Booking Confirmed", JOptionPane.INFORMATION_MESSAGE);
-
-                        // Clear fields
-                        guestNameField.setText("");
-                        checkInField.setText("");
-                        checkOutField.setText("");
-                        summaryArea.setText("");
-                    }
-
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(this, "Please enter valid check-in and check-out days!", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
-        });
+        }
+    });
 
-        panel.add(backButton, BorderLayout.NORTH);
-        panel.add(headerLabel, BorderLayout.CENTER);
-        panel.add(contentPanel, BorderLayout.SOUTH);
+    calculatePriceButton.addActionListener(e -> {
+        String selectedName = (String) propertyComboBox.getSelectedItem();
+        if (selectedName != null && manager != null) {
+            Property prop = manager.findProperty(selectedName);
+            if (prop != null) {
+                try {
+                    int checkIn = Integer.parseInt(checkInField.getText().trim());
+                    int checkOut = Integer.parseInt(checkOutField.getText().trim());
 
-        // Initial refresh
-        refreshPropertyComboBox(propertyComboBox);
+                    // Create temporary reservation to calculate price
+                    Reservation tempReservation = new Reservation("TEMP", checkIn, checkOut);
+                    tempReservation.calculateTotal(prop.getDates());
 
-        return panel;
-    }
+                    summaryArea.setText("=== PRICE CALCULATION ===\n\n");
+                    summaryArea.append("Property: " + prop.getName() + "\n");
+                    summaryArea.append("Property Type: " + prop.getPropertyType() + "\n");
+                    summaryArea.append("Property Rate: PHP " + String.format("%.2f", prop.getPropertyRate()) + " per night\n");
+                    summaryArea.append("Check-in: Day " + checkIn + "\n");
+                    summaryArea.append("Check-out: Day " + checkOut + "\n");
+                    summaryArea.append("Total Nights: " + (checkOut - checkIn) + "\n");
+                    summaryArea.append("Total Price: PHP " + String.format("%.2f", tempReservation.getTotalPrice()) + "\n\n");
+
+                    summaryArea.append("PRICE BREAKDOWN:\n");
+                    List<Double> breakdown = tempReservation.getBreakdown();
+                    for (int i = 0; i < breakdown.size(); i++) {
+                        int day = checkIn + i;
+                        Date date = prop.findDate(day);
+                        double modifier = date != null ? date.getModifier() : 1.0;
+                        summaryArea.append(String.format("  Day %2d: PHP %8.2f (Modifier: %.0f%%)%n",
+                                day, breakdown.get(i), modifier * 100));
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, "Please enter valid check-in and check-out days!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+    });
+
+    confirmBookingButton.addActionListener(e -> {
+        String selectedName = (String) propertyComboBox.getSelectedItem();
+        String guestName = guestNameField.getText().trim();
+
+        if (selectedName == null || guestName.isEmpty() || manager == null) {
+            JOptionPane.showMessageDialog(this, "Please select a property and enter guest name!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Property prop = manager.findProperty(selectedName);
+        if (prop != null) {
+            try {
+                int checkIn = Integer.parseInt(checkInField.getText().trim());
+                int checkOut = Integer.parseInt(checkOutField.getText().trim());
+
+                if (!prop.areDatesAvailable(checkIn, checkOut)) {
+                    JOptionPane.showMessageDialog(this, "Selected dates are not available!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Create and confirm reservation
+                Reservation reservation = new Reservation(guestName, checkIn, checkOut);
+                reservation.calculateTotal(prop.getDates());
+
+                int confirm = JOptionPane.showConfirmDialog(this,
+                        "Confirm booking for " + guestName + "?\n" +
+                                "Property: " + prop.getName() + "\n" +
+                                "Dates: Day " + checkIn + " to Day " + checkOut + "\n" +
+                                "Total Price: PHP " + String.format("%.2f", reservation.getTotalPrice()),
+                        "Confirm Booking", JOptionPane.YES_NO_OPTION);
+
+                if (confirm == JOptionPane.YES_OPTION) {
+                    prop.bookDates(checkIn, checkOut);
+                    prop.addReservation(reservation);
+
+                    JOptionPane.showMessageDialog(this,
+                            "Booking confirmed successfully!\n\n" +
+                                    "Guest: " + guestName + "\n" +
+                                    "Property: " + prop.getName() + "\n" +
+                                    "Dates: Day " + checkIn + " to Day " + checkOut + "\n" +
+                                    "Total: PHP " + String.format("%.2f", reservation.getTotalPrice()),
+                            "Booking Confirmed", JOptionPane.INFORMATION_MESSAGE);
+
+                    // Clear fields
+                    guestNameField.setText("");
+                    checkInField.setText("");
+                    checkOutField.setText("");
+                    summaryArea.setText("");
+                }
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Please enter valid check-in and check-out days!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    });
+
+    panel.add(backButton, BorderLayout.NORTH);
+    panel.add(headerLabel, BorderLayout.CENTER);
+    panel.add(contentPanel, BorderLayout.SOUTH);
+
+    // Initial refresh
+    refreshPropertyComboBox(propertyComboBox);
+
+    return panel;
+}
 
     /**
      * Refreshes the property combo box with current properties from the system manager.

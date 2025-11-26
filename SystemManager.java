@@ -1,20 +1,25 @@
+// SystemManager.java
 /**
  * SystemManager.java
  *
  * Main controller class for the Green Property Exchange system.
- * Updated for MCO2 with GUI support and proper price calculations.
+ * Updated for MCO2 with GUI support, proper price calculations, and environmental impact management.
+ * Follows Single Responsibility Principle - manages the system and coordinates between components.
+ * Follows Dependency Inversion Principle - depends on abstractions (Property) not concrete implementations.
  *
  * MCO2 - Green Property Exchange
  * @author Group 23 - John Ethan Chiuten, Julian Nicos Reyes
- * @version 4.1
+ * @version 6.0
  */
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class SystemManager {
-    private ArrayList<Property> properties;
-    private Scanner sc;
+    private final List<Property> properties;
+    private final Scanner sc;
+    private final PropertyFactory propertyFactory;
 
     /**
      * Constructs a new SystemManager with empty property list.
@@ -23,6 +28,7 @@ public class SystemManager {
     public SystemManager(Scanner scanner) {
         this.properties = new ArrayList<Property>();
         this.sc = scanner;
+        this.propertyFactory = new PropertyFactory();
     }
 
     /**
@@ -31,16 +37,18 @@ public class SystemManager {
     public SystemManager() {
         this.properties = new ArrayList<Property>();
         this.sc = null;
+        this.propertyFactory = new PropertyFactory();
     }
 
-    // GUI Helper Methods
+    // GUI Helper Methods following Interface Segregation Principle
 
     /**
      * Gets all properties in the system for GUI display.
+     * Returns defensive copy for encapsulation.
      * @return list of all properties
      */
-    public ArrayList<Property> getAllProperties() {
-        return properties;
+    public List<Property> getAllProperties() {
+        return new ArrayList<>(properties);
     }
 
     /**
@@ -57,38 +65,63 @@ public class SystemManager {
 
     /**
      * Creates a property with GUI parameters.
+     * Follows Single Responsibility Principle - only handles property creation.
      * @param name the property name
      * @param propertyType the type of property
      * @param basePrice the base price
      * @return true if creation successful, false otherwise
      */
-    public boolean createPropertyGUI(String name, String propertyType, double basePrice) {
-        try {
-            if (name == null || name.trim().isEmpty()) {
-                return false;
-            }
-
-            if (findProperty(name) != null) {
-                return false;
-            }
-
-            Property newProp = createPropertyByType(name, propertyType);
-            if (newProp == null) {
-                return false;
-            }
-
-            newProp.setPropertyType(propertyType);
-            newProp.setBasePrice(basePrice);
-            properties.add(newProp);
-
-            // Show the calculated property rate
-            System.out.println("[SUCCESS] Property '" + name + "' created with rate: PHP " +
-                    String.format("%.2f", newProp.getPropertyRate()));
-            return true;
-
-        } catch (Exception e) {
+public boolean createPropertyGUI(String name, String propertyType, double basePrice) {
+    try {
+        if (!validatePropertyCreation(name, propertyType, basePrice)) {
             return false;
         }
+
+        Property newProp = propertyFactory.createProperty(name, propertyType);
+        if (newProp == null) {
+            return false;
+        }
+
+        newProp.setPropertyType(propertyType);
+        newProp.setBasePrice(basePrice);
+        properties.add(newProp);
+
+        // Apply preset environmental impacts AFTER property is fully created
+        newProp.getEnvironmentalImpactManager().applyImpactsToProperty(newProp);
+
+        System.out.println("[SUCCESS] Property '" + name + "' created with rate: PHP " +
+                String.format("%.2f", newProp.getPropertyRate()));
+        System.out.println("All 30 dates have been added and preset environmental impacts applied.");
+        return true;
+
+    } catch (Exception e) {
+        System.out.println("Error creating property: " + e.getMessage());
+        return false;
+    }
+}
+
+    /**
+     * Validates property creation parameters.
+     * Follows Single Responsibility Principle - validation logic separated.
+     * @param name the property name
+     * @param propertyType the property type
+     * @param basePrice the base price
+     * @return true if valid, false otherwise
+     */
+    private boolean validatePropertyCreation(String name, String propertyType, double basePrice) {
+        if (name == null || name.trim().isEmpty()) {
+            return false;
+        }
+        if (findProperty(name) != null) {
+            return false;
+        }
+        if (propertyType == null || propertyType.trim().isEmpty()) {
+            return false;
+        }
+        if (basePrice < 100 || basePrice > 999999) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -131,7 +164,7 @@ public class SystemManager {
      * @param checkOut the check-out day
      * @return list of unavailable days
      */
-    public ArrayList<Integer> getUnavailableDaysGUI(String propertyName, int checkIn, int checkOut) {
+    public List<Integer> getUnavailableDaysGUI(String propertyName, int checkIn, int checkOut) {
         Property prop = findProperty(propertyName);
         if (prop == null) return new ArrayList<Integer>();
         return prop.getUnavailableDays(checkIn, checkOut);
@@ -177,10 +210,10 @@ public class SystemManager {
         return true;
     }
 
-    // Console Methods
+    // Console Methods following Single Responsibility Principle
 
     /**
-     * Handles the complete property creation process.
+     * Handles the complete property creation process with environmental impacts.
      */
     public void createProperty() {
         try {
@@ -208,18 +241,22 @@ public class SystemManager {
                 return;
             }
 
-            Property newProp = createPropertyByType(name, propertyType);
+            Property newProp = propertyFactory.createProperty(name, propertyType);
             if (newProp == null) {
                 System.out.println("[ERROR] Invalid property type.");
                 return;
             }
 
             newProp.setPropertyType(propertyType);
-            setupPropertyDates(newProp);
+            
+            // Apply preset environmental impacts
+            newProp.getEnvironmentalImpactManager().applyImpactsToProperty(newProp);
+            
             properties.add(newProp);
 
             System.out.println("[SUCCESS] Property '" + name + "' created successfully!");
             System.out.println("Property Rate: PHP " + String.format("%.2f", newProp.getPropertyRate()) + " per night");
+            System.out.println("All 30 dates have been added and preset environmental impacts applied.");
 
         } catch (Exception e) {
             System.out.println("[ERROR] Error creating property: " + e.getMessage());
@@ -248,10 +285,11 @@ public class SystemManager {
                 System.out.println("3. Date Information");
                 System.out.println("4. Reservation Information");
                 System.out.println("5. All Reservations");
-                System.out.println("6. Back to Main Menu");
+                System.out.println("6. Environmental Impacts");
+                System.out.println("7. Back to Main Menu");
                 System.out.print("Enter choice: ");
 
-                int choice = getValidatedInt(1, 6);
+                int choice = getValidatedInt(1, 7);
 
                 switch (choice) {
                     case 1:
@@ -273,16 +311,12 @@ public class SystemManager {
                         prop.displayReservationInfo(startDay, endDay);
                         break;
                     case 5:
-                        if (prop.getReservations().isEmpty()) {
-                            System.out.println("[INFO] No reservations for this property.");
-                        } else {
-                            System.out.println("\n=== ALL RESERVATIONS ===");
-                            for (Reservation reservation : prop.getReservations()) {
-                                reservation.displayReservation();
-                            }
-                        }
+                        displayAllReservations(prop);
                         break;
                     case 6:
+                        displayEnvironmentalImpacts(prop);
+                        break;
+                    case 7:
                         continueViewing = false;
                         System.out.println("Returning to main menu...");
                         break;
@@ -291,6 +325,47 @@ public class SystemManager {
 
         } catch (Exception e) {
             System.out.println("[ERROR] Error viewing property: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Displays all reservations for a property.
+     * Follows Single Responsibility Principle - only handles reservation display.
+     * @param prop the property to display reservations for
+     */
+    private void displayAllReservations(Property prop) {
+        if (prop.getReservations().isEmpty()) {
+            System.out.println("[INFO] No reservations for this property.");
+        } else {
+            System.out.println("\n=== ALL RESERVATIONS ===");
+            for (Reservation reservation : prop.getReservations()) {
+                reservation.displayReservation();
+            }
+        }
+    }
+
+    /**
+     * Displays environmental impacts for a property.
+     * @param prop the property to display impacts for
+     */
+    private void displayEnvironmentalImpacts(Property prop) {
+        System.out.println("\n=== ENVIRONMENTAL IMPACTS ===");
+        System.out.println("-----------------------------------");
+        
+        boolean hasImpacts = false;
+        for (Date date : prop.getDates()) {
+            if (!date.getEnvironmentalImpactName().equals("Standard")) {
+                System.out.println("Day " + date.getDayNumber() + ": " + 
+                        date.getEnvironmentalImpactName() + " (" + 
+                        String.format("%.0f", date.getModifier() * 100) + "%) - PHP " + 
+                        String.format("%.2f", date.getFinalPrice()));
+                hasImpacts = true;
+            }
+        }
+        
+        if (!hasImpacts) {
+            System.out.println("No custom environmental impacts set.");
+            System.out.println("All dates use standard pricing (100% modifier).");
         }
     }
 
@@ -316,80 +391,38 @@ public class SystemManager {
                 System.out.println("3. Change Property Type");
                 System.out.println("4. Add Date");
                 System.out.println("5. Remove Date");
-                System.out.println("6. Remove this Property");
-                System.out.println("7. Back to Main Menu");
+                System.out.println("6. Set Environmental Impact");
+                System.out.println("7. Remove this Property");
+                System.out.println("8. Back to Main Menu");
                 System.out.print("Enter choice: ");
 
-                int choice = getValidatedInt(1, 7);
+                int choice = getValidatedInt(1, 8);
 
                 switch (choice) {
                     case 1:
-                        System.out.print("Enter new property name: ");
-                        String newName = sc.nextLine().trim();
-                        try {
-                            prop.setName(newName);
-                            System.out.println("[SUCCESS] Property name updated.");
-                        } catch (Exception e) {
-                            System.out.println("[ERROR] " + e.getMessage());
-                        }
+                        changePropertyName(prop);
                         break;
                     case 2:
-                        System.out.print("Enter new base price (>= 100): ");
-                        double newPrice = getValidatedDouble(100, 999999);
-                        try {
-                            prop.setBasePrice(newPrice);
-                            System.out.println("[SUCCESS] Base price updated to PHP " + String.format("%.2f", newPrice));
-                            System.out.println("New property rate: PHP " + String.format("%.2f", prop.getPropertyRate()));
-                        } catch (Exception e) {
-                            System.out.println("[ERROR] " + e.getMessage());
-                        }
+                        changeBasePrice(prop);
                         break;
                     case 3:
-                        System.out.print("Enter new property type: ");
-                        String newType = sc.nextLine().trim();
-                        try {
-                            prop.setPropertyType(newType);
-                            System.out.println("[SUCCESS] Property type updated.");
-                            System.out.println("Property rate: PHP " + String.format("%.2f", prop.getPropertyRate()));
-                        } catch (Exception e) {
-                            System.out.println("[ERROR] " + e.getMessage());
-                        }
+                        changePropertyType(prop);
                         break;
                     case 4:
-                        if (prop.getDates().size() >= 30) {
-                            System.out.println("[ERROR] Cannot add more than 30 dates.");
-                        } else {
-                            System.out.print("Enter day number to add (1-30): ");
-                            int dayToAdd = getValidatedInt(1, 30);
-                            try {
-                                prop.addDate(dayToAdd);
-                                System.out.println("[SUCCESS] Date added.");
-                            } catch (Exception e) {
-                                System.out.println("[ERROR] " + e.getMessage());
-                            }
-                        }
+                        addDateToProperty(prop);
                         break;
                     case 5:
-                        System.out.print("Enter day number to remove (1-30): ");
-                        int dayToRemove = getValidatedInt(1, 30);
-                        try {
-                            prop.removeDate(dayToRemove);
-                            System.out.println("[SUCCESS] Date removed.");
-                        } catch (Exception e) {
-                            System.out.println("[ERROR] " + e.getMessage());
-                        }
+                        removeDateFromProperty(prop);
                         break;
                     case 6:
-                        try {
-                            if (removeProperty(prop)) {
-                                System.out.println("[SUCCESS] Property removed successfully.");
-                                return;
-                            }
-                        } catch (Exception e) {
-                            System.out.println("[ERROR] " + e.getMessage());
-                        }
+                        setEnvironmentalImpact(prop);
                         break;
                     case 7:
+                        if (removeProperty(prop)) {
+                            return;
+                        }
+                        break;
+                    case 8:
                         continueManaging = false;
                         System.out.println("Returning to main menu...");
                         break;
@@ -398,6 +431,134 @@ public class SystemManager {
 
         } catch (Exception e) {
             System.out.println("[ERROR] Error managing property: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Changes property name with validation.
+     * Follows Single Responsibility Principle - only handles name change.
+     * @param prop the property to modify
+     */
+    private void changePropertyName(Property prop) {
+        System.out.print("Enter new property name: ");
+        String newName = sc.nextLine().trim();
+        try {
+            prop.setName(newName);
+            System.out.println("[SUCCESS] Property name updated.");
+        } catch (Exception e) {
+            System.out.println("[ERROR] " + e.getMessage());
+        }
+    }
+
+    /**
+     * Changes base price with validation.
+     * Follows Single Responsibility Principle - only handles price change.
+     * @param prop the property to modify
+     */
+    private void changeBasePrice(Property prop) {
+        System.out.print("Enter new base price (>= 100): ");
+        double newPrice = getValidatedDouble(100, 999999);
+        try {
+            prop.setBasePrice(newPrice);
+            System.out.println("[SUCCESS] Base price updated to PHP " + String.format("%.2f", newPrice));
+            System.out.println("New property rate: PHP " + String.format("%.2f", prop.getPropertyRate()));
+        } catch (Exception e) {
+            System.out.println("[ERROR] " + e.getMessage());
+        }
+    }
+
+    /**
+     * Changes property type with validation.
+     * Follows Single Responsibility Principle - only handles type change.
+     * @param prop the property to modify
+     */
+    private void changePropertyType(Property prop) {
+        System.out.print("Enter new property type: ");
+        String newType = sc.nextLine().trim();
+        try {
+            prop.setPropertyType(newType);
+            System.out.println("[SUCCESS] Property type updated.");
+            System.out.println("Property rate: PHP " + String.format("%.2f", prop.getPropertyRate()));
+        } catch (Exception e) {
+            System.out.println("[ERROR] " + e.getMessage());
+        }
+    }
+
+    /**
+     * Adds date to property with validation.
+     * Follows Single Responsibility Principle - only handles date addition.
+     * @param prop the property to modify
+     */
+    private void addDateToProperty(Property prop) {
+        if (prop.getDates().size() >= 30) {
+            System.out.println("[ERROR] Cannot add more than 30 dates. Property already has all dates.");
+        } else {
+            System.out.print("Enter day number to add (1-30): ");
+            int dayToAdd = getValidatedInt(1, 30);
+            try {
+                prop.addDate(dayToAdd);
+                System.out.println("[SUCCESS] Date added.");
+            } catch (Exception e) {
+                System.out.println("[ERROR] " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Removes date from property with validation.
+     * Follows Single Responsibility Principle - only handles date removal.
+     * @param prop the property to modify
+     */
+    private void removeDateFromProperty(Property prop) {
+        System.out.print("Enter day number to remove (1-30): ");
+        int dayToRemove = getValidatedInt(1, 30);
+        try {
+            prop.removeDate(dayToRemove);
+            System.out.println("[SUCCESS] Date removed.");
+        } catch (Exception e) {
+            System.out.println("[ERROR] " + e.getMessage());
+        }
+    }
+
+    /**
+     * Sets environmental impact for a specific date.
+     * @param prop the property to modify
+     */
+    private void setEnvironmentalImpact(Property prop) {
+        System.out.print("Enter day number to modify (1-30): ");
+        int dayNumber = getValidatedInt(1, 30);
+        
+        Date date = prop.findDate(dayNumber);
+        if (date == null) {
+            System.out.println("[ERROR] Day " + dayNumber + " not found in property.");
+            return;
+        }
+        
+        if (date.isBooked()) {
+            System.out.println("[ERROR] Cannot modify environmental impact for booked date.");
+            return;
+        }
+        
+        System.out.println("\nCurrent environmental impact for day " + dayNumber + ":");
+        System.out.println("Impact Name: " + date.getEnvironmentalImpactName());
+        System.out.println("Modifier: " + String.format("%.0f", date.getModifier() * 100) + "%");
+        System.out.println("Final Price: PHP " + String.format("%.2f", date.getFinalPrice()));
+        
+        System.out.print("\nEnter new environmental impact name: ");
+        String impactName = sc.nextLine().trim();
+        if (impactName.isEmpty()) {
+            impactName = "Custom Impact";
+        }
+        
+        System.out.print("Enter new environmental modifier (0.8-1.2): ");
+        double modifier = getValidatedDouble(0.8, 1.2);
+        
+        try {
+            prop.setEnvironmentalModifier(dayNumber, modifier, impactName);
+            System.out.println("[SUCCESS] Environmental impact updated!");
+            System.out.println("New final price: PHP " + String.format("%.2f", date.getFinalPrice()));
+        } catch (Exception e) {
+            System.out.println("[ERROR] " + e.getMessage());
         }
     }
 
@@ -469,7 +630,7 @@ public class SystemManager {
         }
     }
 
-    // Utility Methods
+    // Utility Methods following Single Responsibility Principle
 
     /**
      * Guides user through property selection.
@@ -489,48 +650,6 @@ public class SystemManager {
     }
 
     /**
-     * Creates a property instance based on the specified type.
-     * @param name the property name
-     * @param type the property type
-     * @return a new Property instance
-     */
-    private Property createPropertyByType(String name, String type) {
-        if (type.equalsIgnoreCase("Eco-Apartment")) {
-            return new EcoApartmentFeeCalc(name);
-        } else if (type.equalsIgnoreCase("Sustainable House")) {
-            return new SustainableHouseFeeCalc(name);
-        } else if (type.equalsIgnoreCase("Green Resort")) {
-            return new GreenResortFeeCalc(name);
-        } else if (type.equalsIgnoreCase("Eco-Glamping")) {
-            return new EcoGlampingFeeCalc(name);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Guides user through setting up available dates.
-     * @param property the property to add dates to
-     */
-    private void setupPropertyDates(Property property) {
-        System.out.print("Enter number of available dates (1-30): ");
-        int numDates = getValidatedInt(1, 30);
-
-        System.out.println("\nEnter the specific day numbers (1-30) for available dates:");
-        for (int i = 0; i < numDates; i++) {
-            System.out.print("Date " + (i + 1) + ": ");
-            int dayNumber = getValidatedInt(1, 30);
-
-            try {
-                property.addDate(dayNumber);
-            } catch (IllegalArgumentException e) {
-                System.out.println("[ERROR] " + e.getMessage() + " Please choose a different day.");
-                i--; // Retry this iteration
-            }
-        }
-    }
-
-    /**
      * Displays a formatted list of all properties.
      */
     public void listProperties() {
@@ -541,7 +660,8 @@ public class SystemManager {
             for (int i = 0; i < properties.size(); i++) {
                 Property p = properties.get(i);
                 System.out.println("   " + (i + 1) + ". " + p.getName() + " (" + p.getPropertyType() +
-                        ") - Rate: PHP " + String.format("%.2f", p.getPropertyRate()));
+                        ") - Rate: PHP " + String.format("%.2f", p.getPropertyRate()) +
+                        " - Dates: " + p.getDates().size() + "/30");
             }
         }
     }
@@ -576,7 +696,11 @@ public class SystemManager {
             return false;
         }
 
-        return properties.remove(property);
+        boolean removed = properties.remove(property);
+        if (removed) {
+            System.out.println("[SUCCESS] Property removed successfully.");
+        }
+        return removed;
     }
 
     /**
@@ -617,5 +741,30 @@ public class SystemManager {
                 System.out.print("[ERROR] Invalid input. Enter a number: ");
             }
         }
+    }
+
+    /**
+     * Returns the number of properties in the system.
+     * @return number of properties
+     */
+    public int getPropertyCount() {
+        return properties.size();
+    }
+
+    /**
+     * Returns true if the system has no properties.
+     * @return true if no properties, false otherwise
+     */
+    public boolean isEmpty() {
+        return properties.isEmpty();
+    }
+
+    /**
+     * Clears all properties from the system.
+     * Use with caution - mainly for testing purposes.
+     */
+    public void clearAllProperties() {
+        properties.clear();
+        System.out.println("[INFO] All properties cleared from system.");
     }
 }

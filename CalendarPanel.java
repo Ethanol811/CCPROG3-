@@ -1,13 +1,14 @@
+// CalendarPanel.java
 /**
  * CalendarPanel.java
  *
  * Enhanced calendar view with environmental impact pricing modifiers for the Green Property Exchange system.
  * Displays color-coded dates based on environmental modifiers and provides interactive date management.
- * Users can view property availability, modify environmental modifiers, and manage dates through mouse interactions.
+ * Environmental impacts are always visible regardless of property selection.
  *
  * MCO2 - Green Property Exchange
  * @author Group 23
- * @version 3.1
+ * @version 4.3
  */
 
 import javax.swing.*;
@@ -22,18 +23,21 @@ public class CalendarPanel extends JPanel {
     private JLabel[][] dateLabels;
     private JPanel calendarPanel;
     private JLabel infoLabel;
+    private EnvironmentalImpactManager environmentalImpactManager;
 
     // Colors for environmental modifiers
     private final Color GREEN_COLOR = new Color(144, 238, 144);    // 80-89%
     private final Color WHITE_COLOR = Color.WHITE;                 // 100%
     private final Color YELLOW_COLOR = new Color(255, 255, 153);   // 101-120%
     private final Color BOOKED_COLOR = new Color(255, 200, 200);   // Booked dates
+    private final Color IMPACT_ONLY_COLOR = new Color(200, 230, 255); // Environmental impact only (no property)
 
     /**
      * Constructs a new CalendarPanel with default initialization.
      * Sets up the calendar layout, legend, and interactive components.
      */
     public CalendarPanel() {
+        this.environmentalImpactManager = new EnvironmentalImpactManager();
         setLayout(new BorderLayout());
         initializeCalendar();
     }
@@ -131,7 +135,7 @@ public class CalendarPanel extends JPanel {
         }
 
         // Info panel
-        infoLabel = new JLabel("Select a property to view calendar", JLabel.CENTER);
+        infoLabel = new JLabel("Environmental impacts are always visible. Select a property to view availability.", JLabel.CENTER);
         infoLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
         // Add components to calendar container
@@ -145,6 +149,9 @@ public class CalendarPanel extends JPanel {
 
         // Add main container to this panel
         add(mainContainer, BorderLayout.CENTER);
+        
+        // Initial display of environmental impacts
+        updateCalendarDisplay();
     }
 
     /**
@@ -155,9 +162,12 @@ public class CalendarPanel extends JPanel {
      * @return JPanel containing the complete legend with color codes and descriptions
      */
     private JPanel createLegendPanel() {
-        JPanel legendPanel = new JPanel(new GridLayout(5, 1, 5, 5));
+        JPanel legendPanel = new JPanel(new GridLayout(6, 1, 5, 5));
         legendPanel.setBorder(BorderFactory.createTitledBorder("Legend"));
-        legendPanel.setPreferredSize(new Dimension(180, 200));
+        legendPanel.setPreferredSize(new Dimension(180, 240));
+
+        // Environmental Impact Only (no property)
+        JPanel impactOnlyLegend = createLegendItem(IMPACT_ONLY_COLOR, "Impact Only", "Environmental Impact (No Property)");
 
         // Available - Green modifier
         JPanel greenLegend = createLegendItem(GREEN_COLOR, "Green: 80-89%", "Reduced Impact");
@@ -174,6 +184,7 @@ public class CalendarPanel extends JPanel {
         // Empty
         JPanel emptyLegend = createLegendItem(Color.LIGHT_GRAY, "Not Listed", "Not Available");
 
+        legendPanel.add(impactOnlyLegend);
         legendPanel.add(greenLegend);
         legendPanel.add(whiteLegend);
         legendPanel.add(yellowLegend);
@@ -219,23 +230,23 @@ public class CalendarPanel extends JPanel {
     }
 
     /**
-     * Updates the calendar display to reflect the current property's state.
-     * Colors each date cell based on availability, booking status, and environmental modifiers.
-     * Sets tooltips with detailed pricing information for each date.
+     * Updates the calendar display to reflect environmental impacts and property state.
+     * Environmental impacts are always visible regardless of property selection.
+     * Colors each date cell based on environmental modifiers, availability, and booking status.
+     * Sets tooltips with detailed information for each date.
      */
     private void updateCalendarDisplay() {
+        // Update info label based on property selection
         if (currentProperty == null) {
-            infoLabel.setText("No property selected");
-            return;
+            infoLabel.setText("Environmental impacts are always visible. Select a property to view availability.");
+        } else {
+            infoLabel.setText("Property: " + currentProperty.getName() +
+                    " | Type: " + currentProperty.getPropertyType() +
+                    " | Base Price: PHP " + String.format("%.2f", currentProperty.getBasePrice()) +
+                    " | Property Rate: PHP " + String.format("%.2f", currentProperty.getPropertyRate()));
         }
 
-        // Show both base price and property rate
-        infoLabel.setText("Property: " + currentProperty.getName() +
-                " | Type: " + currentProperty.getPropertyType() +
-                " | Base Price: PHP " + String.format("%.2f", currentProperty.getBasePrice()) +
-                " | Property Rate: PHP " + String.format("%.2f", currentProperty.getPropertyRate()));
-
-        // Reset all dates
+        // Update all dates - environmental impacts are always visible
         for (int row = 0; row < 5; row++) {
             for (int col = 0; col < 7; col++) {
                 int dayNumber = row * 7 + col + 1;
@@ -247,34 +258,69 @@ public class CalendarPanel extends JPanel {
                     continue;
                 }
 
-                Date date = currentProperty.findDate(dayNumber);
-
-                if (date == null) {
-                    // Date not listed in property
-                    dateLabel.setBackground(Color.LIGHT_GRAY);
-                    dateLabel.setToolTipText("Day " + dayNumber + ": Not available");
-                } else if (date.isBooked()) {
-                    // Booked date
-                    dateLabel.setBackground(BOOKED_COLOR);
-                    dateLabel.setToolTipText("Day " + dayNumber + ": BOOKED - PHP " +
-                            String.format("%.2f", date.getFinalPrice()) +
-                            " (Property Rate: PHP " + String.format("%.2f", date.getBasePrice()) +
-                            " × " + String.format("%.0f", date.getModifier() * 100) + "%)");
-                } else {
-                    // Available date - color code by environmental modifier
-                    double modifier = date.getModifier();
-                    if (modifier < 0.9) {
-                        dateLabel.setBackground(GREEN_COLOR);  // 80-89%
-                    } else if (modifier == 1.0) {
-                        dateLabel.setBackground(WHITE_COLOR);  // 100%
+                // Check for environmental impact first (always visible)
+                EnvironmentalImpact impact = environmentalImpactManager.getImpact(dayNumber);
+                
+                if (currentProperty == null) {
+                    // No property selected - show only environmental impacts
+                    if (impact != null) {
+                        // Date has environmental impact
+                        double modifier = impact.getModifier();
+                        if (modifier < 0.9) {
+                            dateLabel.setBackground(GREEN_COLOR);
+                        } else if (modifier <= 1.0) {
+                            dateLabel.setBackground(WHITE_COLOR);
+                        } else {
+                            dateLabel.setBackground(YELLOW_COLOR);
+                        }
+                        dateLabel.setToolTipText("Day " + dayNumber + ": " + impact.getName() + 
+                                " (" + String.format("%.0f", impact.getModifier() * 100) + "%)" +
+                                " - No property selected");
                     } else {
-                        dateLabel.setBackground(YELLOW_COLOR); // 101-120%
+                        // No environmental impact and no property
+                        dateLabel.setBackground(IMPACT_ONLY_COLOR);
+                        dateLabel.setToolTipText("Day " + dayNumber + ": No environmental impact - No property selected");
                     }
+                } else {
+                    // Property is selected - show property status with environmental impacts
+                    Date date = currentProperty.findDate(dayNumber);
 
-                    dateLabel.setToolTipText("Day " + dayNumber +
-                            ": Available - PHP " + String.format("%.2f", date.getFinalPrice()) +
-                            " (Property Rate: PHP " + String.format("%.2f", date.getBasePrice()) +
-                            " × " + String.format("%.0f", modifier * 100) + "%)");
+                    if (date == null) {
+                        // Date not listed in property, but may have environmental impact
+                        if (impact != null) {
+                            dateLabel.setBackground(IMPACT_ONLY_COLOR);
+                            dateLabel.setToolTipText("Day " + dayNumber + ": " + impact.getName() + 
+                                    " (" + String.format("%.0f", impact.getModifier() * 100) + "%)" +
+                                    " - Not available in " + currentProperty.getName());
+                        } else {
+                            dateLabel.setBackground(Color.LIGHT_GRAY);
+                            dateLabel.setToolTipText("Day " + dayNumber + ": Not available in " + currentProperty.getName());
+                        }
+                    } else if (date.isBooked()) {
+                        // Booked date
+                        dateLabel.setBackground(BOOKED_COLOR);
+                        dateLabel.setToolTipText("Day " + dayNumber + ": BOOKED - PHP " +
+                                String.format("%.2f", date.getFinalPrice()) +
+                                " (Property Rate: PHP " + String.format("%.2f", date.getBasePrice()) +
+                                " × " + String.format("%.0f", date.getModifier() * 100) + "%)" +
+                                " - " + date.getEnvironmentalImpactName());
+                    } else {
+                        // Available date - color code by environmental modifier
+                        double modifier = date.getModifier();
+                        if (modifier < 0.9) {
+                            dateLabel.setBackground(GREEN_COLOR);
+                        } else if (modifier <= 1.0) {
+                            dateLabel.setBackground(WHITE_COLOR);
+                        } else {
+                            dateLabel.setBackground(YELLOW_COLOR);
+                        }
+
+                        dateLabel.setToolTipText("Day " + dayNumber +
+                                ": Available - PHP " + String.format("%.2f", date.getFinalPrice()) +
+                                " (Property Rate: PHP " + String.format("%.2f", date.getBasePrice()) +
+                                " × " + String.format("%.0f", modifier * 100) + "%)" +
+                                " - " + date.getEnvironmentalImpactName());
+                    }
                 }
             }
         }
@@ -284,75 +330,167 @@ public class CalendarPanel extends JPanel {
 
     /**
      * Handles mouse click events on calendar dates.
-     * Provides different functionality based on the date's current state:
-     * - Unlisted dates: Option to add to property availability
-     * - Available dates: Show details and allow environmental modifier modification
-     * - Booked dates: Show reservation information
+     * Shows environmental impact information and allows modification when property is selected.
+     * Environmental impacts are always visible regardless of property selection.
      *
      * @param dayNumber the day number that was clicked (1-30)
      */
     private void handleDateClick(int dayNumber) {
-        if (currentProperty == null) return;
-
-        Date date = currentProperty.findDate(dayNumber);
-
-        if (date == null) {
-            // Option to add this date
-            int option = JOptionPane.showConfirmDialog(this,
-                    "Add day " + dayNumber + " to property availability?",
-                    "Add Date", JOptionPane.YES_NO_OPTION);
-
-            if (option == JOptionPane.YES_OPTION) {
-                currentProperty.addDate(dayNumber);
-                updateCalendarDisplay();
+        // Always show environmental impact information
+        EnvironmentalImpact impact = environmentalImpactManager.getImpact(dayNumber);
+        
+        if (currentProperty == null) {
+            // No property selected - show environmental impact info only
+            if (impact != null) {
                 JOptionPane.showMessageDialog(this,
-                        "Day " + dayNumber + " added successfully!\n" +
-                                "Property Rate: PHP " + String.format("%.2f", currentProperty.getPropertyRate()) +
-                                "\nFinal Price: PHP " + String.format("%.2f", currentProperty.findDate(dayNumber).getFinalPrice()),
-                        "Date Added", JOptionPane.INFORMATION_MESSAGE);
-            }
-        } else if (!date.isBooked()) {
-            // Show date details and allow modifier change
-            String message = "Day " + dayNumber + " Details:\n" +
-                    "Property Rate: PHP " + String.format("%.2f", date.getBasePrice()) + "\n" +
-                    "Environmental Modifier: " + String.format("%.0f", date.getModifier() * 100) + "%\n" +
-                    "Final Price: PHP " + String.format("%.2f", date.getFinalPrice()) + "\n" +
-                    "Status: Available";
-
-            String newModifier = JOptionPane.showInputDialog(this,
-                    message + "\n\nEnter new environmental modifier (0.8 - 1.2):",
-                    String.valueOf(date.getModifier()));
-
-            if (newModifier != null) {
-                try {
-                    double modifier = Double.parseDouble(newModifier);
-                    if (modifier >= 0.8 && modifier <= 1.2) {
-                        currentProperty.setEnvironmentalModifier(dayNumber, modifier);
-                        updateCalendarDisplay();
-                        Date updatedDate = currentProperty.findDate(dayNumber);
-                        JOptionPane.showMessageDialog(this,
-                                "Environmental modifier updated!\n" +
-                                        "New Final Price: PHP " + String.format("%.2f", updatedDate.getFinalPrice()),
-                                "Modifier Updated", JOptionPane.INFORMATION_MESSAGE);
-                    } else {
-                        JOptionPane.showMessageDialog(this,
-                                "Modifier must be between 0.8 and 1.2",
-                                "Invalid Modifier", JOptionPane.ERROR_MESSAGE);
-                    }
-                } catch (NumberFormatException e) {
-                    JOptionPane.showMessageDialog(this,
-                            "Please enter a valid number",
-                            "Invalid Input", JOptionPane.ERROR_MESSAGE);
-                }
+                        "Environmental Impact - Day " + dayNumber + "\n" +
+                        "Impact: " + impact.getName() + "\n" +
+                        "Modifier: " + String.format("%.0f", impact.getModifier() * 100) + "%\n" +
+                        "Status: No property selected\n\n" +
+                        "Select a property to view availability and modify impacts.",
+                        "Environmental Impact",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Day " + dayNumber + "\n" +
+                        "No environmental impact set\n" +
+                        "Standard modifier: 100%\n" +
+                        "Status: No property selected\n\n" +
+                        "Select a property to view availability.",
+                        "No Environmental Impact",
+                        JOptionPane.INFORMATION_MESSAGE);
             }
         } else {
-            // Booked date - show reservation info
-            JOptionPane.showMessageDialog(this,
-                    "Day " + dayNumber + " is BOOKED\n" +
-                            "Property Rate: PHP " + String.format("%.2f", date.getBasePrice()) + "\n" +
-                            "Environmental Modifier: " + String.format("%.0f", date.getModifier() * 100) + "%\n" +
-                            "Final Price: PHP " + String.format("%.2f", date.getFinalPrice()),
-                    "Booked Date", JOptionPane.INFORMATION_MESSAGE);
+            // Property is selected - show property-specific information and allow modification
+            Date date = currentProperty.findDate(dayNumber);
+            
+            if (date == null) {
+                // Date not available in property
+                if (impact != null) {
+                    JOptionPane.showMessageDialog(this,
+                            "Day " + dayNumber + " - Not Available\n" +
+                            "Environmental Impact: " + impact.getName() + "\n" +
+                            "Modifier: " + String.format("%.0f", impact.getModifier() * 100) + "%\n" +
+                            "Property: " + currentProperty.getName() + "\n\n" +
+                            "This date is not available in the selected property.\n" +
+                            "Use 'Manage Property' to add dates.",
+                            "Date Not Available",
+                            JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Day " + dayNumber + " - Not Available\n" +
+                            "No environmental impact set\n" +
+                            "Standard modifier: 100%\n" +
+                            "Property: " + currentProperty.getName() + "\n\n" +
+                            "This date is not available in the selected property.\n" +
+                            "Use 'Manage Property' to add dates.",
+                            "Date Not Available",
+                            JOptionPane.INFORMATION_MESSAGE);
+                }
+            } else if (!date.isBooked()) {
+                // Available date - show details and allow environmental impact modification
+                showDateDetailsAndModifyImpact(dayNumber, date);
+            } else {
+                // Booked date - show reservation info
+                showBookedDateInfo(dayNumber, date);
+            }
         }
     }
+
+    /**
+     * Shows detailed information about an available date and allows environmental impact modification.
+     *
+     * @param dayNumber the day number being viewed
+     * @param date the date object containing the details
+     */
+    private void showDateDetailsAndModifyImpact(int dayNumber, Date date) {
+        String message = "Day " + dayNumber + " Details:\n" +
+                "Property: " + currentProperty.getName() + "\n" +
+                "Property Rate: PHP " + String.format("%.2f", date.getBasePrice()) + "\n" +
+                "Environmental Impact: " + date.getEnvironmentalImpactName() + "\n" +
+                "Environmental Modifier: " + String.format("%.0f", date.getModifier() * 100) + "%\n" +
+                "Final Price: PHP " + String.format("%.2f", date.getFinalPrice()) + "\n" +
+                "Status: Available";
+
+        // Create custom panel for modifier and name input
+        JPanel panel = new JPanel(new GridLayout(2, 2));
+        panel.add(new JLabel("Environmental Impact Name:"));
+        JTextField nameField = new JTextField(date.getEnvironmentalImpactName());
+        panel.add(nameField);
+        panel.add(new JLabel("Modifier (0.8 - 1.2):"));
+        JTextField modifierField = new JTextField(String.valueOf(date.getModifier()));
+        panel.add(modifierField);
+
+        int result = JOptionPane.showConfirmDialog(this, panel,
+                "Update Environmental Impact - Day " + dayNumber,
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                double modifier = Double.parseDouble(modifierField.getText());
+                String impactName = nameField.getText().trim();
+                
+                if (impactName.isEmpty()) {
+                    impactName = "Custom Impact";
+                }
+                
+                if (modifier >= 0.8 && modifier <= 1.2) {
+                    currentProperty.setEnvironmentalModifier(dayNumber, modifier, impactName);
+                    updateCalendarDisplay();
+                    Date updatedDate = currentProperty.findDate(dayNumber);
+                    JOptionPane.showMessageDialog(this,
+                            "Environmental impact updated successfully!\n" +
+                                    "Impact: " + impactName + "\n" +
+                                    "Modifier: " + String.format("%.0f", modifier * 100) + "%\n" +
+                                    "New Final Price: PHP " + String.format("%.2f", updatedDate.getFinalPrice()),
+                            "Impact Updated",
+                            JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Modifier must be between 0.8 and 1.2",
+                            "Invalid Modifier",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this,
+                        "Please enter a valid number for modifier",
+                        "Invalid Input",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    /**
+     * Shows information about a booked date.
+     *
+     * @param dayNumber the day number being viewed
+     * @param date the date object containing the details
+     */
+    private void showBookedDateInfo(int dayNumber, Date date) {
+        // Find which reservation this date belongs to
+        String reservationInfo = "No reservation details found";
+        for (Reservation reservation : currentProperty.getReservations()) {
+            if (dayNumber >= reservation.getCheckIn() && dayNumber < reservation.getCheckOut()) {
+                reservationInfo = "Guest: " + reservation.getGuestName() + 
+                                "\nCheck-in: Day " + reservation.getCheckIn() + 
+                                "\nCheck-out: Day " + reservation.getCheckOut();
+                break;
+            }
+        }
+
+        JOptionPane.showMessageDialog(this,
+                "Day " + dayNumber + " is BOOKED\n\n" +
+                        "Property: " + currentProperty.getName() + "\n" +
+                        "Property Rate: PHP " + String.format("%.2f", date.getBasePrice()) + "\n" +
+                        "Environmental Impact: " + date.getEnvironmentalImpactName() + "\n" +
+                        "Environmental Modifier: " + String.format("%.0f", date.getModifier() * 100) + "%\n" +
+                        "Final Price: PHP " + String.format("%.2f", date.getFinalPrice()) + "\n\n" +
+                        reservationInfo,
+                "Booked Date - Day " + dayNumber,
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+
+
 }
